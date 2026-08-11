@@ -1,8 +1,10 @@
-use macroquad::{color::{BLUE, Color, GREEN, RED, YELLOW}, shapes::{draw_line, draw_triangle}};
+use macroquad::{color::{Color, WHITE}, prelude::{Vec2, Vec3}, shapes::{draw_circle, draw_line, draw_triangle}};
+
 
 use crate::point::*;
+use crate::{C_H_S,C_S};
 use crate::camera::Camera;
-use crate::utils::from_i32_to_f32;
+use crate::utils::{Renderable,from_i32_to_f32};
 
 pub enum FaceDirection {
     XPlus,
@@ -15,48 +17,53 @@ pub enum FaceDirection {
 
 pub struct Face {
     points: [Point; 4],
-    mid_pos: [f32; 3],
-    direction: FaceDirection,
-    color: Color,
+    mid_pos: Vec3,
     segment_color: Color,
+    direction: FaceDirection,
+    pub on: bool,
 }
 
 impl Face {
-    pub fn new(pos: [i32; 3], direction: FaceDirection, color: Color) -> Face {
+    pub fn new(pos: [i32; 3], direction: FaceDirection) -> Face {
 
         let mut mid_pos = from_i32_to_f32(pos);
 
         let poses = match direction {
-            FaceDirection::XMinus => {mid_pos[1] += 0.5; mid_pos[2] += 0.5; [pos, [pos[0], pos[1], pos[2] + 1], [pos[0], pos[1] + 1, pos[2] + 1], [pos[0], pos[1] + 1, pos[2]]]},
-            FaceDirection::XPlus => {mid_pos[0] += 1.0; mid_pos[1] += 0.5; mid_pos[2] += 0.5; [[pos[0] + 1, pos[1], pos[2]], [pos[0] + 1, pos[1] + 1, pos[2]], [pos[0] + 1, pos[1] + 1, pos[2] + 1], [pos[0] + 1, pos[1], pos[2] + 1]]},
-            FaceDirection::YMinus => {mid_pos[0] += 0.5; mid_pos[2] += 0.5; [pos, [pos[0] + 1, pos[1], pos[2]], [pos[0] + 1, pos[1], pos[2] + 1], [pos[0], pos[1], pos[2] + 1]]},
-            FaceDirection::YPlus => {mid_pos[0] += 0.5; mid_pos[1] += 1.0; mid_pos[2] += 0.5; [[pos[0], pos[1] + 1, pos[2]], [pos[0], pos[1] + 1, pos[2] + 1], [pos[0] + 1, pos[1] + 1, pos[2] + 1], [pos[0] + 1, pos[1] + 1, pos[2]]]},
-            FaceDirection::ZMinus => {mid_pos[0] += 0.5; mid_pos[1] += 0.5; [pos, [pos[0], pos[1] + 1, pos[2]], [pos[0] + 1, pos[1] + 1, pos[2]], [pos[0] + 1, pos[1], pos[2]]]}
-            FaceDirection::ZPlus => {mid_pos[0] += 0.5; mid_pos[1] += 0.5; mid_pos[2] += 1.0; [[pos[0], pos[1], pos[2] + 1], [pos[0] + 1, pos[1], pos[2] + 1], [pos[0] + 1, pos[1] + 1, pos[2] + 1], [pos[0], pos[1] + 1, pos[2] + 1]]}
+            FaceDirection::XMinus => {mid_pos[1] += C_H_S; mid_pos[2] += C_H_S; [pos, [pos[0], pos[1], pos[2] + 1], [pos[0], pos[1] + 1, pos[2] + 1], [pos[0], pos[1] + 1, pos[2]]]},
+            FaceDirection::XPlus => {mid_pos[0] += C_S; mid_pos[1] += C_H_S; mid_pos[2] += C_H_S; [[pos[0] + 1, pos[1], pos[2]], [pos[0] + 1, pos[1] + 1, pos[2]], [pos[0] + 1, pos[1] + 1, pos[2] + 1], [pos[0] + 1, pos[1], pos[2] + 1]]},
+            FaceDirection::YMinus => {mid_pos[0] += C_H_S; mid_pos[2] += C_H_S; [pos, [pos[0] + 1, pos[1], pos[2]], [pos[0] + 1, pos[1], pos[2] + 1], [pos[0], pos[1], pos[2] + 1]]},
+            FaceDirection::YPlus => {mid_pos[0] += C_H_S; mid_pos[1] += C_S; mid_pos[2] += C_H_S; [[pos[0], pos[1] + 1, pos[2]], [pos[0], pos[1] + 1, pos[2] + 1], [pos[0] + 1, pos[1] + 1, pos[2] + 1], [pos[0] + 1, pos[1] + 1, pos[2]]]},
+            FaceDirection::ZMinus => {mid_pos[0] += C_H_S; mid_pos[1] += C_H_S; [pos, [pos[0], pos[1] + 1, pos[2]], [pos[0] + 1, pos[1] + 1, pos[2]], [pos[0] + 1, pos[1], pos[2]]]}
+            FaceDirection::ZPlus => {mid_pos[0] += C_H_S; mid_pos[1] += C_H_S; mid_pos[2] += C_S; [[pos[0], pos[1], pos[2] + 1], [pos[0] + 1, pos[1], pos[2] + 1], [pos[0] + 1, pos[1] + 1, pos[2] + 1], [pos[0], pos[1] + 1, pos[2] + 1]]}
         };
 
-        let points = [Point::new(from_i32_to_f32(poses[0]), RED), Point::new(from_i32_to_f32(poses[1]), GREEN), Point::new(from_i32_to_f32(poses[2]), BLUE), Point::new(from_i32_to_f32(poses[3]), YELLOW)];
+        let points = [Point::new(from_i32_to_f32(poses[0])), Point::new(from_i32_to_f32(poses[1])), Point::new(from_i32_to_f32(poses[2])), Point::new(from_i32_to_f32(poses[3]))];
 
         let segment_color = Color::new(1.0, 1.0, 1.0, 1.0);
-        Face {points, mid_pos, direction, color, segment_color}
+        Face {points, mid_pos, segment_color, direction, on: true }
     }
 
-    pub fn draw(&self, cam: &Camera) {
-        if cam.should_render_face(&self.direction, self.mid_pos) {
-            let p1_pos = cam.project(&self.points[0]);
-            let p2_pos = cam.project(&self.points[1]);
-            let p3_pos = cam.project(&self.points[2]);
-            let p4_pos = cam.project(&self.points[3]);
-            draw_triangle(p1_pos, p2_pos, p3_pos, self.color);
-            draw_triangle(p1_pos, p4_pos, p3_pos, self.color);
-            draw_line(p1_pos[0], p1_pos[1], p2_pos[0], p2_pos[1], 1.0, self.segment_color);
-            draw_line(p2_pos[0], p2_pos[1], p3_pos[0], p3_pos[1], 1.0, self.segment_color);
-            draw_line(p3_pos[0], p3_pos[1], p4_pos[0], p4_pos[1], 1.0, self.segment_color);
-            draw_line(p4_pos[0], p4_pos[1], p1_pos[0], p1_pos[1], 1.0, self.segment_color);
-            // draw_circle(p1_pos[0], p1_pos[1], 10.0, self.points[0].color);
-            // draw_circle(p2_pos[0], p2_pos[1], 10.0, self.points[1].color);
-            // draw_circle(p3_pos[0], p3_pos[1], 10.0, self.points[2].color);
-            // draw_circle(p4_pos[0], p4_pos[1], 10.0, self.points[3].color);
+    // pub fn draw(&self, color: &Color, cam: &Camera) {}
+}
+
+impl Renderable for Face {
+    fn draw(&self, cam: &Camera) {
+        if self.on && cam.should_render_face(&self.direction, self.mid_pos) {
+            let proj_p: Vec<Vec2> = self.points.iter()
+                .map(|p| cam.project(p))
+                .collect();
+
+            draw_triangle(proj_p[0], proj_p[1], proj_p[2], WHITE);
+            draw_triangle(proj_p[0], proj_p[3], proj_p[2], WHITE);
+
+            draw_line(proj_p[0][0], proj_p[0][1], proj_p[1][0], proj_p[1][1], 1.0, self.segment_color);
+            draw_line(proj_p[1][0], proj_p[1][1], proj_p[2][0], proj_p[2][1], 1.0, self.segment_color);
+            draw_line(proj_p[2][0], proj_p[2][1], proj_p[3][0], proj_p[3][1], 1.0, self.segment_color);
+            draw_line(proj_p[3][0], proj_p[3][1], proj_p[0][0], proj_p[0][1], 1.0, self.segment_color);
+            // draw_circle(proj_p[0][0], proj_p[0][1], 10.0, self.points[0].color);
+            // draw_circle(proj_p[1][0], proj_p[1][1], 10.0, self.points[0].color);
+            // draw_circle(proj_p[2][0], proj_p[2][1], 10.0, self.points[0].color);
+            // draw_circle(proj_p[3][0], proj_p[3][1], 10.0, self.points[0].color);
         }
     }
 }

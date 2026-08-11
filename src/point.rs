@@ -1,10 +1,11 @@
+use macroquad::math::Vec3;
+
 pub struct Point {
-    pub pos: [f32; 3],
-    pub color: macroquad::color::Color
+    pub pos: Vec3,
 }
 
 impl Point {
-    pub fn new(pos: [f32; 3], color: macroquad::color::Color) -> Point {
-        Point {pos, color}
+    pub fn new(pos: Vec3) -> Point {
+        Point {pos}
     }
 }
