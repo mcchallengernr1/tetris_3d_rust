@@ -8,6 +8,7 @@ mod field;
 
 use std::println;
 
+use crate::field::Field;
 use crate::point::Point;
 use crate::segment::Segment;
 use crate::camera::Camera;
@@ -38,7 +39,9 @@ async fn main() {
 
     let mut cubes = vec![cube1, cube2];
 
-    let segment = Segment::new(Point::new(Vec3::ZERO), Point::new(Vec3::ZERO), WHITE);
+    let segment = Segment::new(Point::new(Vec3::ZERO), Point::new(Vec3::ZERO));
+
+    let field = Field::new();
 
     loop {
         let mouse_pos = mouse_position_local();

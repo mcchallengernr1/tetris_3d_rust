@@ -1,5 +1,5 @@
 use crate::{Point, utils::Renderable, Camera};
-use macroquad::{math::Vec3, color::Color, shapes::draw_line};
+use macroquad::{color::{Color, WHITE}, math::Vec3, shapes::draw_line};
 
 pub struct Segment {
     points: [Point; 2],
@@ -8,9 +8,9 @@ pub struct Segment {
 }
 
 impl Segment {
-    pub fn new(p1: Point, p2: Point, color: Color) -> Segment {
+    pub fn new(p1: Point, p2: Point) -> Segment {
         let mid_pos = (p1.pos + p2.pos) / 2.0;
-
+        let color = WHITE;
         Segment { points: [p1, p2], 
             mid_pos,
             color }

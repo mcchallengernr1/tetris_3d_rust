@@ -6,6 +6,6 @@ pub struct Point {
 
 impl Point {
     pub fn new(pos: Vec3) -> Point {
-        Point {pos}
+        Point { pos }
     }
 }
