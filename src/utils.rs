@@ -17,4 +17,9 @@ pub fn window_conf() -> Conf {
 
 pub trait Renderable {
     fn draw(&self, cam: &Camera);
+    fn dist_to_pos(&self, pos: Vec3) -> f32;
 }
+
+    // pub fn dist_to_pos(&self, pos: Vec3) -> f32 {
+    //     (self.mid_pos - pos).length()
+    // }
