@@ -3,14 +3,20 @@ mod camera;
 mod utils;
 mod face;
 mod cube;
-
+mod segment;
+mod field;
 
 use std::println;
 
+use crate::point::Point;
+use crate::segment::Segment;
 use crate::camera::Camera;
 use crate::cube::Cube;
 use crate::utils::{window_conf, Renderable};
 
+use macroquad::color::WHITE;
+use macroquad::math::Vec3;
+use macroquad::miniquad::CursorIcon::Pointer;
 use macroquad::{color::Color, input::{MouseButton, is_mouse_button_down, mouse_position_local}, prelude::{
     KeyCode, is_key_pressed, next_frame, screen_height, screen_width
 }};
@@ -32,6 +38,8 @@ async fn main() {
 
     let mut cubes = vec![cube1, cube2];
 
+    let segment = Segment::new(Point::new(Vec3::ZERO), Point::new(Vec3::ZERO), WHITE);
+
     loop {
         let mouse_pos = mouse_position_local();
         if is_key_pressed(KeyCode::Tab) {
@@ -46,10 +54,12 @@ async fn main() {
         // Display
         cam.clear_screen();
 
-        // println!("{}", cube1.dist_to_pos(cam.pos));
+        cubes.sort_by(|c1, c2| c1.dist_to_pos(cam.pos).total_cmp(&c2.dist_to_pos(cam.pos)));
+
         for cube in &cubes {
             cube.draw(&cam);
         }
+        segment.draw(&cam);
         // cube1.draw(&cam);
         // cube2.draw(&cam);
 
