@@ -10,6 +10,7 @@ use crate::field::Field;
 use crate::piece::Piece;
 use crate::point::*;
 use crate::face::*;
+use crate::field::{CELLS_IN_X, CELLS_IN_Y, CELLS_IN_Z};
 
 pub struct Camera {
     pub pos: Vec3,
@@ -29,7 +30,7 @@ pub struct Camera {
 impl Camera {
     pub fn new(width: f32, height: f32) -> Camera {
         let pos = Vec3::ZERO;
-        let orbit_center_pos = Vec3::ZERO;
+        let orbit_center_pos = Vec3::new(CELLS_IN_X as f32 / 2.0, CELLS_IN_Y as f32 / 2.0, CELLS_IN_Z as f32 / 2.0);
         let radius = 50.0;
         let focal_length = 2.0;
         let inclination = std::f32::consts::PI / 2.0;
@@ -99,6 +100,7 @@ impl Camera {
         let xm_yp_predraw = !(self.pos[0] < 0.0 || self.pos[1] > field.outline["xm_yp"].mid_pos[1]);
         let xp_yp_predraw = !(self.pos[0] > field.outline["xp_yp"].mid_pos[0] || self.pos[1] > field.outline["xp_yp"].mid_pos[1]);
 
+        // Predraw
         if top_predraw {
             field.outline["t_xm"].draw(self);
             field.outline["t_xp"].draw(self);
@@ -111,6 +113,7 @@ impl Camera {
         if xp_ym_predraw {field.outline["xp_ym"].draw(self);}
         if xp_yp_predraw {field.outline["xp_yp"].draw(self);}
 
+        // Draw Cubes
         let mut cubes: Vec<&Cube> = Vec::new();
         for cube in &field.cubes {
             cubes.push(cube);
@@ -122,6 +125,9 @@ impl Camera {
 
         cubes.sort_by(|c1, c2| c2.dist_to_pos(self.pos).total_cmp(&c1.dist_to_pos(self.pos)));
 
+        cubes.iter().for_each(|c| c.draw(self));
+
+        // Postdraw
         if !top_predraw {
             field.outline["t_xm"].draw(self);
             field.outline["t_xp"].draw(self);
