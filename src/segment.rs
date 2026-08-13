@@ -1,14 +1,14 @@
-use crate::{Point, utils::Renderable, Camera};
+use crate::{point::Point, utils::Renderable, Camera};
 use macroquad::{color::{Color, PURPLE}, math::Vec3, shapes::draw_line};
 
-pub struct Segment<'a> {
-    points: [&'a Point; 2],
+pub struct Segment {
+    points: [Point; 2],
     mid_pos: Vec3,
     color: Color,
 }
 
-impl<'a> Segment<'a> {
-    pub fn new(p1: &'a Point, p2: &'a Point) -> Segment<'a> {
+impl<'a> Segment {
+    pub fn new(p1: Point, p2: Point) -> Segment {
         let mid_pos = (p1.pos + p2.pos) / 2.0;
         let color = PURPLE;
         Segment { points: [p1, p2], 
@@ -17,7 +17,7 @@ impl<'a> Segment<'a> {
     }
 }
 
-impl<'a> Renderable for Segment<'a> {
+impl Renderable for Segment {
     fn draw(&self, cam: &Camera) {
         let p0 = cam.project(&self.points[0]);
         let p1 = cam.project(&self.points[1]);

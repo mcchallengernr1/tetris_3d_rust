@@ -3,7 +3,11 @@ use macroquad::math::Vec2;
 use macroquad::math::Vec3;
 use macroquad::window::clear_background;
 
+use crate::cube::Cube;
 use crate::face::FaceDirection::*;
+use crate::utils::Renderable;
+use crate::field::Field;
+use crate::piece::Piece;
 use crate::point::*;
 use crate::face::*;
 
@@ -19,6 +23,7 @@ pub struct Camera {
     polar_uv: Vec3,
     azimuth_uv: Vec3,
     spherical_mov_multiplier: f32,
+    pub quadrant: i32,
 }
 
 impl Camera {
@@ -32,8 +37,9 @@ impl Camera {
         let polar_uv = Vec3::ZERO;
         let azimuth_uv = Vec3::ZERO;
         let spherical_mov_multiplier = width / 300.0;
+        let quadrant = 0;
 
-        Camera {pos, orbit_center_pos, radius, focal_length, width, height, inclination, azimuth, polar_uv, azimuth_uv, spherical_mov_multiplier}
+        Camera {pos, orbit_center_pos, radius, focal_length, width, height, inclination, azimuth, polar_uv, azimuth_uv, spherical_mov_multiplier, quadrant }
     }
     
     pub fn project(&self, p: &Point) -> Vec2 {
@@ -66,6 +72,8 @@ impl Camera {
         if self.inclination > std::f32::consts::PI {self.inclination = std::f32::consts::PI}
         if self.azimuth < 0.0 {self.azimuth += 2.0 * std::f32::consts::PI}
         if self.azimuth > std::f32::consts::PI * 2.0 {self.azimuth -= 2.0 * std::f32::consts::PI};
+
+        self.quadrant = (self.azimuth / (std::f32::consts::PI / 4.0)).floor() as i32;
     }
 
     pub fn should_render_face(&self, face_direction: &FaceDirection, coordinate: Vec3) -> bool {
@@ -81,5 +89,49 @@ impl Camera {
 
     pub fn clear_screen(&self) {
         clear_background(BLACK);
+    }
+
+    pub fn draw(&self, piece: &Piece, field: &Field) {
+        let top_predraw = self.pos[2] < field.outline["t_xm"].mid_pos[2];
+        let grid_predraw = self.pos[2] > field.grid[0].mid_pos[2];
+        let xm_ym_predraw = !(self.pos[0] < 0.0 || self.pos[1] < 0.0);
+        let xp_ym_predraw = !(self.pos[0] > field.outline["xp_ym"].mid_pos[0] || self.pos[1] < 0.0);
+        let xm_yp_predraw = !(self.pos[0] < 0.0 || self.pos[1] > field.outline["xm_yp"].mid_pos[1]);
+        let xp_yp_predraw = !(self.pos[0] > field.outline["xp_yp"].mid_pos[0] || self.pos[1] > field.outline["xp_yp"].mid_pos[1]);
+
+        if top_predraw {
+            field.outline["t_xm"].draw(self);
+            field.outline["t_xp"].draw(self);
+            field.outline["t_ym"].draw(self);
+            field.outline["t_yp"].draw(self);
+        } if grid_predraw {
+            field.grid.iter().for_each(|s| s.draw(self));
+        } if xm_ym_predraw {field.outline["xm_ym"].draw(self);}
+        if xm_yp_predraw {field.outline["xm_yp"].draw(self);}
+        if xp_ym_predraw {field.outline["xp_ym"].draw(self);}
+        if xp_yp_predraw {field.outline["xp_yp"].draw(self);}
+
+        let mut cubes: Vec<&Cube> = Vec::new();
+        for cube in &field.cubes {
+            cubes.push(cube);
+        }
+
+        for cube in &piece.cubes {
+            cubes.push(cube);
+        }
+
+        cubes.sort_by(|c1, c2| c2.dist_to_pos(self.pos).total_cmp(&c1.dist_to_pos(self.pos)));
+
+        if !top_predraw {
+            field.outline["t_xm"].draw(self);
+            field.outline["t_xp"].draw(self);
+            field.outline["t_ym"].draw(self);
+            field.outline["t_yp"].draw(self);
+        } if !grid_predraw {
+            field.grid.iter().for_each(|s| s.draw(self));
+        } if !xm_ym_predraw {field.outline["xm_ym"].draw(self);}
+        if !xm_yp_predraw {field.outline["xm_yp"].draw(self);}
+        if !xp_ym_predraw {field.outline["xp_ym"].draw(self);}
+        if !xp_yp_predraw {field.outline["xp_yp"].draw(self);}
     }
 }
