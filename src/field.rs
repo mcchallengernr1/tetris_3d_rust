@@ -6,21 +6,13 @@ use crate::C_S;
 use crate::{cube::Cube};
 use crate::line::{Line, Dir};
 
-const CELLS_IN_X: i32 = 9;
-const CELLS_IN_Y: i32 = 9;
-const CELLS_IN_Z: i32 = 20;
+pub const CELLS_IN_X: i32 = 9;
+pub const CELLS_IN_Y: i32 = 9;
+pub const CELLS_IN_Z: i32 = 20;
 
 pub struct Field<'a> {
     pub cubes: Vec<Cube>,
     pub outline: HashMap<&'a str, Line>,
-    //xm_ym: Line,
-    //xp_ym: Line,
-    //xm_yp: Line,
-    //xp_yp: Line,
-    //t_xp: Line,
-    //t_xm: Line,
-    //t_yp: Line,
-    //t_ym: Line,
     pub grid: Vec<Line>,
 }
 
@@ -28,10 +20,10 @@ impl<'a> Field<'a> {
     pub fn new() -> Field<'a> {
         let mut grid = Vec::new();
 
-        for i in 0..CELLS_IN_X {
+        for i in 0..=CELLS_IN_X {
             grid.push(Line::new(Vec3::new(i as f32 * C_S, 0.0, 0.0), CELLS_IN_Y as u32, Dir::Y))
         }
-        for j in 0..CELLS_IN_Y {
+        for j in 0..=CELLS_IN_Y {
             grid.push(Line::new(Vec3::new(0.0, j as f32 * C_S, 0.0), CELLS_IN_X as u32, Dir::X));
         }
 
