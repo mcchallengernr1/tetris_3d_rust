@@ -28,38 +28,22 @@ const C_H_S: f32 = C_S / 2.0;
 
 #[macroquad::main(window_conf)]
 async fn main() {
-    
-    // let cube1 = Cube::new([0, 0, 0], RED);
-    // let cube2 = Cube::new([0, 0, 2], BLUE);
-    // let face_array = [Face::new([0, 0, 0], XMinus, Color { r: 0.3, g: 0.3, b: 0.3, a: 1.0 }), Face::new([0, 0, 0], XPlus, Color { r: 0.6, g: 0.6, b: 0.6, a: 1.0 }), Face::new([0, 0, 0], YMinus, Color { r: 0.3, g: 0.3, b: 0.3, a: 1.0 }), Face::new([0, 0, 0], YPlus, Color { r: 0.6, g: 0.6, b: 0.6, a: 1.0 }), Face::new([0, 0, 0], ZMinus, Color { r: 0.3, g: 0.3, b: 0.3, a: 1.0 }), Face::new([0, 0, 0], ZPlus, Color { r: 0.6, g: 0.6, b: 0.6, a: 1.0 })];
 
     let mut game_handler = Game_Handler::new();
     let mut cam = Camera::new(screen_width(), screen_height());
     cam.update_internal_vars();
 
 
-    let piece = Piece::new(0);
+    let mut piece = Piece::new(0);
 
     let mut field = Field::new(); 
 
     field.cubes.push(Cube::new([1, 1, 10], RED));
 
-    loop {
-        let mouse_pos = mouse_position_local();
-        if is_key_pressed(KeyCode::Tab) {
-            break
-        } if is_key_pressed(KeyCode::Right) {
-            piece = Piece::new(piece.n + 1);
-            println!("{}", piece.n);
-        } if is_key_pressed(KeyCode::Left) {
-            piece = Piece::new(piece.n - 1);
-            println!("{}", piece.n);
-        } if is_mouse_button_down(MouseButton::Left) {
-        cam.spherical_movement([last_mouse_position[0] - mouse_pos[0], last_mouse_position[1] - mouse_pos[1]]);
-        cam.update_internal_vars();
-        }
-        last_mouse_position = mouse_pos;
-
+    while game_handler.running {
+        
+    } {
+        game_handler.events(&mut cam, &mut piece);
 
         // Display
         cam.clear_screen();

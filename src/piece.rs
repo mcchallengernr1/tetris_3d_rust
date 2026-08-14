@@ -1,4 +1,4 @@
-use crate::cube::Cube;
+use crate::{cube::{self, Cube}, utils::Movable};
 use macroquad::{color::{Color, GREEN}, math::Vec3};
 use crate::field::{CELLS_IN_X, CELLS_IN_Y, CELLS_IN_Z};
 
@@ -33,11 +33,39 @@ const PIECE_CONFIG: [[[i32; 3]; 5]; 29]= [
     [[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1], [-1, 1, 0]],
     [[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1], [-1, 0, 1]]];
 
-const PIECE_COLOR: [Color; 1] = [[(255, 0, 0), (255, 51, 0), (255, 106, 0), (255, 157, 0), (255, 215, 0), (222, 235, 0), (188, 245, 0), (140, 255, 0), 
-                (89, 255, 0), (34, 255, 0), (0, 255, 17), (0, 255, 72), (0, 255, 123), (0, 255, 174), (0, 255, 229), (0, 229, 255), 
-                (0, 174, 255), (0, 123, 255), (0, 72, 255), (0, 17, 255), (34, 0, 255), (89, 0, 255), (140, 0, 255), (195, 0, 255), 
-                (247, 0, 255), (255, 0, 212), (255, 0, 157), (255, 0, 106), (255, 0, 51)]
-];
+const PIECE_COLOR: [Color; 29] = [
+    Color::from_rgba(255, 0, 0, 255), 
+    Color::from_rgba(255, 51, 0, 255), 
+    Color::from_rgba(255, 106, 0, 255), 
+    Color::from_rgba(255, 157, 0, 255), 
+    Color::from_rgba(255, 215, 0, 255), 
+    Color::from_rgba(222, 235, 0, 255), 
+    Color::from_rgba(188, 245, 0, 255), 
+    Color::from_rgba(140, 255, 0, 255), 
+    Color::from_rgba(89, 255, 0, 255),
+    Color::from_rgba(34, 255, 0, 255), 
+    Color::from_rgba(0, 255, 17, 255), 
+    Color::from_rgba(0, 255, 72, 255), 
+    Color::from_rgba(0, 255, 123, 255), 
+    Color::from_rgba(0, 255, 174, 255), 
+    Color::from_rgba(0, 255, 229, 255), 
+    Color::from_rgba(0, 229, 255, 255), 
+    Color::from_rgba(0, 174, 255, 255),
+    Color::from_rgba(0, 123, 255, 255), 
+    Color::from_rgba(0, 72, 255, 255), 
+    Color::from_rgba(0, 17, 255, 255), 
+    Color::from_rgba(34, 0, 255, 255), 
+    Color::from_rgba(89, 0, 255, 255), 
+    Color::from_rgba(140, 0, 255, 255), 
+    Color::from_rgba(195, 0, 255, 255), 
+    Color::from_rgba(247, 0, 255, 255), 
+    Color::from_rgba(255, 0, 212, 255), 
+    Color::from_rgba(255, 0, 157, 255), 
+    Color::from_rgba(255, 0, 106, 255), 
+    Color::from_rgba(255, 0, 51, 255)];
+
+
+// [[[255, 0, 0], [255, 51, 0], [255, 106, 0], [255, 157, 0], [255, 215, 0], [222, 235, 0], [188, 245, 0], [140, 255, 0], [89, 255, 0], [34, 255, 0], [0, 255, 17], [0, 255, 72], [0, 255, 123], [0, 255, 174], [0, 255, 229], [0, 229, 255], [0, 174, 255], [0, 123, 255], [0, 72, 255], [0, 17, 255], [34, 0, 255], [89, 0, 255], [140, 0, 255], [195, 0, 255], [247, 0, 255], [255, 0, 212], [255, 0, 157], [255, 0, 106], [255, 0, 51]]];
 
 pub struct Piece {
     pub n: usize,
@@ -47,13 +75,22 @@ pub struct Piece {
 
 impl Piece {
     pub fn new(n: usize) -> Piece {
-        let pos = [CELLS_IN_X / 2, CELLS_IN_Y / 2, CELLS_IN_Z / 2];
-        let cubes = PIECE_CONFIG[n].map(|cpos| Cube::new([cpos[0] + pos[0], cpos[1] + pos[1], cpos[2] + pos[2]], PIECE_COLOR[0]));
-
+        let pos = [CELLS_IN_X / 2, CELLS_IN_Y / 2, CELLS_IN_Z];
+        // let pos = [CELLS_IN_X / 2, CELLS_IN_Y / 2, CELLS_IN_Z / 2];
+        let cubes = PIECE_CONFIG[n].map(|cpos| Cube::new([cpos[0] + pos[0], cpos[1] + pos[1], cpos[2] + pos[2]], PIECE_COLOR[n]));
+        Color::from_rgba(255, 255, 255, 255);
         Piece {
             n,
             cubes,
             pos
+        }
+    }
+}
+
+impl Movable for Piece {
+    fn move_(&mut self, movement: Vec3) {
+        for c in &mut self.cubes {
+            c.move_(movement);
         }
     }
 }

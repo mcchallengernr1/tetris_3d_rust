@@ -20,6 +20,9 @@ pub trait Renderable {
     fn dist_to_pos(&self, pos: Vec3) -> f32;
 }
 
+pub trait Movable {
+    fn move_(&mut self, movement: Vec3);
+}
     // pub fn dist_to_pos(&self, pos: Vec3) -> f32 {
     //     (self.mid_pos - pos).length()
     // }

@@ -1,7 +1,7 @@
 use crate::face::{Face, FaceDirection::*};
 use crate::camera::Camera;
 use crate::C_H_S;
-use crate::utils::Renderable;
+use crate::utils::{Movable, Renderable};
 use macroquad::color::Color;
 use macroquad::math::Vec3;
 
@@ -45,5 +45,15 @@ impl Renderable for Cube {
 
     fn dist_to_pos(&self, pos: Vec3) -> f32 {
         (self.mid_pos - pos).length()
+    }
+}
+
+impl Movable for Cube {
+    fn move_(&mut self, movement: Vec3) {
+        self.mid_pos += movement;
+        for f in &mut self.faces {
+            f.move_(movement)
+        }
+        self.pos = [self.pos[0] + movement[0].floor() as i32, self.pos[1] + movement[1].floor() as i32, self.pos[2] + movement[2].floor() as i32]
     }
 }

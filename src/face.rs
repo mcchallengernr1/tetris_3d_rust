@@ -1,7 +1,7 @@
 use macroquad::{color::Color, prelude::{Vec2, Vec3}, shapes::{draw_line, draw_triangle}};
 
 
-use crate::point::*;
+use crate::{point::*, utils::Movable};
 use crate::{C_H_S,C_S};
 use crate::camera::Camera;
 use crate::utils::{Renderable,from_i32_to_f32};
@@ -64,5 +64,14 @@ impl Renderable for Face {
     
     fn dist_to_pos(&self, pos: Vec3) -> f32 {
         (self.mid_pos - pos).length()
+    }
+}
+
+impl Movable for Face {
+    fn move_(&mut self, movement: Vec3) {
+        for p in &mut self.points {
+            p.move_(movement)
+        }
+        self.mid_pos += movement;
     }
 }
