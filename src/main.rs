@@ -42,7 +42,6 @@ async fn main() {
 
     while game_handler.running {
         
-    } {
         game_handler.events(&mut cam, &mut piece);
 
         // Display
