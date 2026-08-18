@@ -1,6 +1,7 @@
-use crate::{cube::{self, Cube}, utils::Movable};
-use macroquad::{color::{Color, GREEN}, math::Vec3};
+use crate::{cube::Cube, field::Field, utils::Movable};
+use macroquad::{color::Color, math::Vec3};
 use crate::field::{CELLS_IN_X, CELLS_IN_Y, CELLS_IN_Z};
+use crate::utils::{from_f32_to_i32, from_i32_to_f32, in_field};
 
 const PIECE_CONFIG: [[[i32; 3]; 5]; 29]= [
     [[-2, 0, 0], [-1, 0, 0], [0, 0, 0], [1, 0, 0], [2, 0, 0]],
@@ -83,6 +84,20 @@ impl Piece {
             n,
             cubes,
             pos
+        }
+    }
+
+    pub fn test_move(&mut self, field: &Field, mov: Vec3) {
+        let mut valid = true;
+        for cube in &self.cubes {
+            let new_pos = from_f32_to_i32(from_i32_to_f32(cube.pos) + mov);
+            if !in_field(new_pos) && field.taken_cube(new_pos) {
+                valid = false;
+            }
+        }
+
+        if valid {
+            self.move_(mov)
         }
     }
 }

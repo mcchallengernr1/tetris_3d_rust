@@ -66,7 +66,7 @@ impl Camera {
             self.orbit_center_pos[2] + self.radius * incl_cos);
     }
 
-    pub fn spherical_movement(&mut self, movement: [f32; 2]) {
+    pub fn spherical_movement(&mut self, movement: Vec2) {
         self.azimuth += movement[0] * self.spherical_mov_multiplier;
         self.inclination += movement[1] * self.spherical_mov_multiplier;
         if self.inclination < 0.0 {self.inclination = 0.0}

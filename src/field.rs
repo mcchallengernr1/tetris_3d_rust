@@ -14,6 +14,7 @@ pub struct Field<'a> {
     pub cubes: Vec<Cube>,
     pub outline: HashMap<&'a str, Line>,
     pub grid: Vec<Line>,
+    occupancy_grid: [[[bool; CELLS_IN_X as usize]; CELLS_IN_Y as usize]; CELLS_IN_Z as usize]
 }
 
 impl<'a> Field<'a> {
@@ -37,7 +38,17 @@ impl<'a> Field<'a> {
             ("t_xp", Line::new(Vec3::new(CELLS_IN_X as f32, 0.0, CELLS_IN_Z as f32), CELLS_IN_Y as u32, Dir::Y)),
             ("t_ym", Line::new(Vec3::new(0.0, 0.0, CELLS_IN_Z as f32), CELLS_IN_X as u32, Dir::X)),
             ("t_yp", Line::new(Vec3::new(0.0, CELLS_IN_Y as f32, CELLS_IN_Z as f32), CELLS_IN_X as u32, Dir::X))]),
-            grid
+            grid,
+            occupancy_grid: [[[false; CELLS_IN_X as usize]; CELLS_IN_Y as usize]; CELLS_IN_Z as usize]
         }
+    }
+
+    pub fn taken_cube(&self, pos: [i32; 3]) -> bool {
+        self.occupancy_grid[pos[2] as usize][pos[1] as usize][pos[0] as usize]
+    }
+
+    pub fn add_cube(&mut self, cube: Cube) {
+        self.occupancy_grid[cube.pos[2] as usize][cube.pos[1] as usize][cube.pos[0] as usize] = true;
+        self.cubes.push(cube);
     }
 }

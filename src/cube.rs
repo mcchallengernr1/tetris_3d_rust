@@ -7,7 +7,7 @@ use macroquad::math::Vec3;
 
 pub struct Cube {
     faces: [Face; 6],
-    pos: [i32; 3],
+    pub pos: [i32; 3],
     mid_pos: Vec3,
 }
 

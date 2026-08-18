@@ -1,9 +1,14 @@
 use macroquad::prelude::*;
 
 use crate::camera::Camera;
+use crate::field::{CELLS_IN_X, CELLS_IN_Y, CELLS_IN_Z};
 
 pub fn from_i32_to_f32(pos: [i32; 3]) -> Vec3 {
     Vec3::new(pos[0] as f32, pos[1] as f32, pos[2] as f32)
+}
+
+pub fn from_f32_to_i32(pos: Vec3) -> [i32; 3] {
+    [pos[0].floor() as i32, pos[1].floor() as i32, pos[2].floor() as i32]
 }
 
 pub fn window_conf() -> Conf {
@@ -14,6 +19,10 @@ pub fn window_conf() -> Conf {
         ..Default::default()
     }
 }
+
+pub fn in_field(pos: [i32; 3]) -> bool {
+    (0 <= pos[0] && CELLS_IN_X > pos[0]) && (0 <= pos[1] && CELLS_IN_Y > pos[1]) && (0 <= pos[2] && CELLS_IN_Z > pos[2])
+} 
 
 pub trait Renderable {
     fn draw(&self, cam: &Camera);
