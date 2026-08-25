@@ -1,14 +1,8 @@
 use crate::segment::Segment;
 use crate::point::Point;
-use crate::utils::Renderable;
+use crate::utils::{Renderable, Dir};
 use macroquad::math::Vec3;
 use crate::C_S;
-
-pub enum Dir {
-    X,
-    Y,
-    Z
-}
 
 pub struct Line {
     segments: Vec<Segment>,

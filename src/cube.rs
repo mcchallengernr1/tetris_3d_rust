@@ -1,7 +1,7 @@
-use crate::face::{Face, FaceDirection::*};
+use crate::face::Face;
 use crate::camera::Camera;
 use crate::C_H_S;
-use crate::utils::{Movable, Renderable};
+use crate::utils::{Movable, Renderable, Direction::*};
 use macroquad::color::Color;
 use macroquad::math::Vec3;
 

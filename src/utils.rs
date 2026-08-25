@@ -3,6 +3,21 @@ use macroquad::prelude::*;
 use crate::camera::Camera;
 use crate::field::{CELLS_IN_X, CELLS_IN_Y, CELLS_IN_Z};
 
+pub enum Direction {
+    XPlus,
+    XMinus,
+    YPlus,
+    YMinus,
+    ZPlus,
+    ZMinus
+}
+
+pub enum Dir {
+    X,
+    Y,
+    Z
+}
+
 pub fn from_i32_to_f32(pos: [i32; 3]) -> Vec3 {
     Vec3::new(pos[0] as f32, pos[1] as f32, pos[2] as f32)
 }

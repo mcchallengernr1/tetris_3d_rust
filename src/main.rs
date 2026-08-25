@@ -41,7 +41,7 @@ async fn main() {
         game_handler.events(&mut cam);
 
         // Logic
-        game_handler.update_piece(&cam, &field, &mut piece);
+        game_handler.update_piece(cam.quadrant, &field, &mut piece);
 
 
         // Display

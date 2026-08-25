@@ -4,7 +4,8 @@ use macroquad::math::Vec3;
 
 use crate::C_S;
 use crate::{cube::Cube};
-use crate::line::{Line, Dir};
+use crate::line::{Line};
+use crate::utils::Dir;
 
 pub const CELLS_IN_X: i32 = 9;
 pub const CELLS_IN_Y: i32 = 9;

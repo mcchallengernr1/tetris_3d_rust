@@ -3,6 +3,8 @@ use macroquad::math::{Vec2, Vec3};
 use macroquad::{input::{MouseButton, is_mouse_button_down, mouse_position_local, mouse_wheel}, prelude::{KeyCode, is_key_pressed}};
 
 use crate::camera::Camera;
+use crate::game_handler::Action::*;
+use crate::utils::{Direction, Direction::*, Dir};
 use crate::piece::Piece;
 use crate::field::Field;
 
@@ -69,18 +71,44 @@ impl GameHandler {
         else {self.action = Action::NoAction};
     }
 
-    pub fn update_piece(&self, cam: &Camera, field: &Field, piece: &mut Piece){
-        if self.scroll == Scroll::Down || self.scroll == Scroll::Up {
-            match cam.quadrant {
-                0 => {if self.scroll == Scroll::Up {piece.test_move(field, Vec3::new(1.0, 0.0, 0.0));} 
-                else if self.scroll == Scroll::Down {piece.test_move(field, Vec3::new(-1.0, 0.0, 0.0));}},
-                1 => {if self.scroll == Scroll::Up {piece.test_move(field, Vec3::new(0.0, -1.0, 0.0));}
-                else if self.scroll == Scroll::Down {piece.test_move(field, Vec3::new(0.0, 1.0, 0.0));}},
-                2 => {if self.scroll == Scroll::Up {piece.test_move(field, Vec3::new(-1.0, 0.0, 0.0));}
-                else if self.scroll == Scroll::Down {piece.test_move(field, Vec3::new(1.0, 0.0, 0.0));}},
-                3 => {if self.scroll == Scroll::Up {piece.test_move(field, Vec3::new(0.0, 1.0, 0.0));}
-                else if self.scroll == Scroll::Down {piece.test_move(field, Vec3::new(0.0, -1.0, 0.0));}},
-                _ => println!("Cam Quadrant: {} not handled", cam.quadrant)}
+    pub fn update_piece(&self, quadrant: i32, field: &Field, piece: &mut Piece){
+
+        let dir: Dir;
+        if self.action == FrontBack || self.action == FlipFBAxis {
+            if quadrant == 0 {}
         }
+
+
+        {
+            self.move_piece( match self.scroll {
+                Scroll::Up => 1.0,
+                Scroll::Not => 0.0,
+                Scroll::Down => -1.0,}
+            );
+
+        }
+    }
+
+    fn move_piece(&self, mov: f32) {
+        let mov: f32 = match self.scroll {
+                Scroll::Up => 1.0,
+                Scroll::Not => 0.0,
+                Scroll::Down => -1.0,
+            };
+
+            let i: usize;
+            /*
+            match quadrant {
+                0 => if self.action == Action::FrontBack {piece.test_move(field, Vec3::new(i, 0.0, 0.0));}
+                else if self.action == Action::LeftRight {piece.test_move(field, Vec3::new(0.0, i, 0.0));},
+                1 => if self.action == Action::FrontBack {piece.test_move(field, Vec3::new(0.0, 0.0, 0.0));}
+                else if self.action == Action::LeftRight {piece.test_move(field, Vec3::new(0.0, 0.0, 0.0));},
+                2 =>  if self.action == Action::FrontBack {piece.test_move(field, Vec3::new(0.0, 0.0, 0.0));}
+                else if self.action == Action::LeftRight {piece.test_move(field, Vec3::new(0.0, 0.0, 0.0));},
+                3 =>  if self.action == Action::FrontBack {piece.test_move(field, Vec3::new(0.0, 0.0, 0.0));}
+                else if self.action == Action::LeftRight {piece.test_move(field, Vec3::new(0.0, 0.0, 0.0));},
+                _ => println!("No more quadrants. {}", quadrant)
+            } */
+
     }
 }

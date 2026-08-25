@@ -4,38 +4,29 @@ use macroquad::{color::Color, prelude::{Vec2, Vec3}, shapes::{draw_line, draw_tr
 use crate::{point::*, utils::Movable};
 use crate::{C_H_S,C_S};
 use crate::camera::Camera;
-use crate::utils::{Renderable,from_i32_to_f32};
-
-pub enum FaceDirection {
-    XPlus,
-    XMinus,
-    YPlus,
-    YMinus,
-    ZPlus,
-    ZMinus
-}
+use crate::utils::{Direction, Direction::*, Renderable,from_i32_to_f32};
 
 pub struct Face {
     points: [Point; 4],
     mid_pos: Vec3,
     segment_color: Color,
-    direction: FaceDirection,
+    direction: Direction,
     pub on: bool,
     color: Color
 }
 
 impl Face {
-    pub fn new(pos: [i32; 3], direction: FaceDirection, color: Color) -> Face {
+    pub fn new(pos: [i32; 3], direction: Direction, color: Color) -> Face {
 
         let mut mid_pos = from_i32_to_f32(pos);
 
         let poses = match direction {
-            FaceDirection::XMinus => {mid_pos[1] += C_H_S; mid_pos[2] += C_H_S; [pos, [pos[0], pos[1], pos[2] + 1], [pos[0], pos[1] + 1, pos[2] + 1], [pos[0], pos[1] + 1, pos[2]]]},
-            FaceDirection::XPlus => {mid_pos[0] += C_S; mid_pos[1] += C_H_S; mid_pos[2] += C_H_S; [[pos[0] + 1, pos[1], pos[2]], [pos[0] + 1, pos[1] + 1, pos[2]], [pos[0] + 1, pos[1] + 1, pos[2] + 1], [pos[0] + 1, pos[1], pos[2] + 1]]},
-            FaceDirection::YMinus => {mid_pos[0] += C_H_S; mid_pos[2] += C_H_S; [pos, [pos[0] + 1, pos[1], pos[2]], [pos[0] + 1, pos[1], pos[2] + 1], [pos[0], pos[1], pos[2] + 1]]},
-            FaceDirection::YPlus => {mid_pos[0] += C_H_S; mid_pos[1] += C_S; mid_pos[2] += C_H_S; [[pos[0], pos[1] + 1, pos[2]], [pos[0], pos[1] + 1, pos[2] + 1], [pos[0] + 1, pos[1] + 1, pos[2] + 1], [pos[0] + 1, pos[1] + 1, pos[2]]]},
-            FaceDirection::ZMinus => {mid_pos[0] += C_H_S; mid_pos[1] += C_H_S; [pos, [pos[0], pos[1] + 1, pos[2]], [pos[0] + 1, pos[1] + 1, pos[2]], [pos[0] + 1, pos[1], pos[2]]]}
-            FaceDirection::ZPlus => {mid_pos[0] += C_H_S; mid_pos[1] += C_H_S; mid_pos[2] += C_S; [[pos[0], pos[1], pos[2] + 1], [pos[0] + 1, pos[1], pos[2] + 1], [pos[0] + 1, pos[1] + 1, pos[2] + 1], [pos[0], pos[1] + 1, pos[2] + 1]]}
+            XMinus => {mid_pos[1] += C_H_S; mid_pos[2] += C_H_S; [pos, [pos[0], pos[1], pos[2] + 1], [pos[0], pos[1] + 1, pos[2] + 1], [pos[0], pos[1] + 1, pos[2]]]},
+            XPlus => {mid_pos[0] += C_S; mid_pos[1] += C_H_S; mid_pos[2] += C_H_S; [[pos[0] + 1, pos[1], pos[2]], [pos[0] + 1, pos[1] + 1, pos[2]], [pos[0] + 1, pos[1] + 1, pos[2] + 1], [pos[0] + 1, pos[1], pos[2] + 1]]},
+            YMinus => {mid_pos[0] += C_H_S; mid_pos[2] += C_H_S; [pos, [pos[0] + 1, pos[1], pos[2]], [pos[0] + 1, pos[1], pos[2] + 1], [pos[0], pos[1], pos[2] + 1]]},
+            YPlus => {mid_pos[0] += C_H_S; mid_pos[1] += C_S; mid_pos[2] += C_H_S; [[pos[0], pos[1] + 1, pos[2]], [pos[0], pos[1] + 1, pos[2] + 1], [pos[0] + 1, pos[1] + 1, pos[2] + 1], [pos[0] + 1, pos[1] + 1, pos[2]]]},
+            ZMinus => {mid_pos[0] += C_H_S; mid_pos[1] += C_H_S; [pos, [pos[0], pos[1] + 1, pos[2]], [pos[0] + 1, pos[1] + 1, pos[2]], [pos[0] + 1, pos[1], pos[2]]]}
+            ZPlus => {mid_pos[0] += C_H_S; mid_pos[1] += C_H_S; mid_pos[2] += C_S; [[pos[0], pos[1], pos[2] + 1], [pos[0] + 1, pos[1], pos[2] + 1], [pos[0] + 1, pos[1] + 1, pos[2] + 1], [pos[0], pos[1] + 1, pos[2] + 1]]}
         };
 
         let points = [Point::new(from_i32_to_f32(poses[0])), Point::new(from_i32_to_f32(poses[1])), Point::new(from_i32_to_f32(poses[2])), Point::new(from_i32_to_f32(poses[3]))];

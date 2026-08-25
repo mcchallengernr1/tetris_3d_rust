@@ -4,12 +4,10 @@ use macroquad::math::Vec3;
 use macroquad::window::clear_background;
 
 use crate::cube::Cube;
-use crate::face::FaceDirection::*;
-use crate::utils::Renderable;
+use crate::utils::{Renderable, Direction, Direction::*};
 use crate::field::Field;
 use crate::piece::Piece;
 use crate::point::*;
-use crate::face::*;
 use crate::field::{CELLS_IN_X, CELLS_IN_Y, CELLS_IN_Z};
 
 pub struct Camera {
@@ -77,7 +75,7 @@ impl Camera {
         self.quadrant = (self.azimuth / (std::f32::consts::PI / 4.0)).floor() as i32;
     }
 
-    pub fn should_render_face(&self, face_direction: &FaceDirection, coordinate: Vec3) -> bool {
+    pub fn should_render_face(&self, face_direction: &Direction, coordinate: Vec3) -> bool {
         match face_direction {
             XMinus => self.pos[0] < coordinate[0],
             XPlus => self.pos[0] > coordinate[0],
