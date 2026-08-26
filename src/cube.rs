@@ -25,17 +25,9 @@ impl Cube {
 
         Cube { faces , pos , mid_pos }
     }
-
-    // pub fn draw(&self, cam: &Camera) {
-    //     for face in &self.faces {
-    //         face.draw(&self.color, cam)
-    //     }
-    // }
-
-    // pub fn dist_to_pos(&self, pos: Vec3) -> f32 {
-    //     (self.mid_pos - pos).length()
-    // }
-
+    pub fn goto(&mut self, pos: [i32; 3]) {
+        self.move_(Vec3::new((pos[0] - self.pos[0]) as f32,(pos[1] - self.pos[1]) as f32,(pos[2] - self.pos[2]) as f32,))
+    }
 }
 
 impl Renderable for Cube {

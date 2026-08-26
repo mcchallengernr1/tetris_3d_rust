@@ -1,7 +1,7 @@
 use crate::{cube::Cube, field::Field, utils::Movable};
 use macroquad::{color::Color, math::Vec3};
 use crate::field::{CELLS_IN_X, CELLS_IN_Y, CELLS_IN_Z};
-use crate::utils::{from_f32_to_i32, from_i32_to_f32, in_field};
+use crate::utils::{from_f32_to_i32, from_i32_to_f32, in_field, Dir};
 
 const PIECE_CONFIG: [[[i32; 3]; 5]; 29]= [
     [[-2, 0, 0], [-1, 0, 0], [0, 0, 0], [1, 0, 0], [2, 0, 0]],
@@ -100,6 +100,35 @@ impl Piece {
             self.move_(mov)
         }
     }
+
+    fn rotate(&mut self, axis: Dir, forwards: bool) {
+        let mut cubes_new_pos = [[0; 3]; 5];
+
+        for i in 0..self.cubes.len() {
+            let relative_pos = [self.cubes[i].pos[0] - self.pos[0], self.cubes[i].pos[1] - self.pos[1], self.cubes[i].pos[2] - self.pos[2]];
+
+            cubes_new_pos[i] = match axis {
+                Dir::X => if forwards {[relative_pos[0], relative_pos[2], - relative_pos[1]]} else {[relative_pos[0], - relative_pos[2], relative_pos[1]]},
+                Dir::Y => if forwards {[- relative_pos[2], relative_pos[1], relative_pos[0]]} else {[relative_pos[2], relative_pos[1], - relative_pos[0]]},
+                Dir::Z => if forwards {[relative_pos[1], - relative_pos[0], relative_pos[2]]} else {[- relative_pos[1], relative_pos[0], relative_pos[2]]},
+            };
+        }
+        
+        
+        
+        
+        //if field.empty
+        //c.goto(
+        //);
+
+        //let mut x = 1;
+        //let mut y = 2; 
+        //let mut c: i32;
+        //if forwards {c = x; x = y; y = - c}  x est x et y est y
+        //else {c = x; x = - y; y = c}
+        
+    }
+
 }
 
 impl Movable for Piece {
