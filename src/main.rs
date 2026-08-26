@@ -30,7 +30,7 @@ async fn main() {
     cam.update_internal_vars();
 
 
-    let mut piece = Piece::new(0);
+    let mut piece = Piece::new(20);
 
     let mut field = Field::new(); 
 

@@ -1,3 +1,5 @@
+use std::println;
+
 use macroquad::color::BLACK;
 use macroquad::math::Vec2;
 use macroquad::math::Vec3;
@@ -72,7 +74,7 @@ impl Camera {
         if self.azimuth < 0.0 {self.azimuth += 2.0 * std::f32::consts::PI}
         if self.azimuth > std::f32::consts::PI * 2.0 {self.azimuth -= 2.0 * std::f32::consts::PI};
 
-        self.quadrant = (self.azimuth / (std::f32::consts::PI / 4.0)).floor() as i32;
+        self.quadrant = (4.0 * self.azimuth / std::f32::consts::PI).floor() as i32;
     }
 
     pub fn should_render_face(&self, face_direction: &Direction, coordinate: Vec3) -> bool {

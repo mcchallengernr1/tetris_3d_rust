@@ -1,6 +1,6 @@
 use macroquad::math::{Vec2, Vec3};
 
-use macroquad::{input::{MouseButton, is_mouse_button_down, mouse_position_local, mouse_wheel}, prelude::{KeyCode, is_key_pressed}};
+use macroquad::{input::{MouseButton, is_mouse_button_down, mouse_position_local, mouse_wheel}, prelude::{KeyCode, is_key_pressed, is_key_down}};
 
 use crate::camera::Camera;
 use crate::game_handler::Action::*;
@@ -63,18 +63,24 @@ impl GameHandler {
             _ => {println!("Scroll amount of range"); Scroll::Not},
         };
 
-        if is_key_pressed(KeyCode::Y) {self.action = Action::FlipLRAxis}
-        else if is_key_pressed(KeyCode::X) {self.action = Action::FlipFBAxis}
-        else if is_key_pressed(KeyCode::C) {self.action = Action::FlipZAxis}
-        else if is_key_pressed(KeyCode::S) {self.action = Action::LeftRight}
-        else if is_key_pressed(KeyCode::D) {self.action = Action::FrontBack}
+        if is_key_down(KeyCode::Y) {self.action = Action::FlipLRAxis}
+        else if is_key_down(KeyCode::X) {self.action = Action::FlipFBAxis}
+        else if is_key_down(KeyCode::C) {self.action = Action::FlipZAxis}
+        else if is_key_down(KeyCode::S) {self.action = Action::LeftRight}
+        else if is_key_down(KeyCode::D) {self.action = Action::FrontBack}
         else {self.action = Action::NoAction};
     }
 
-    pub fn update_piece(&self, quadrant: i32, field: &Field, piece: &mut Piece){
-        
+    pub fn update_piece(&self, _quadrant: i32, field: &Field, piece: &mut Piece){
+        if self.action != NoAction && self.scroll != Scroll::Not {
+            let forwards = match self.scroll {Scroll::Down => false, Scroll::Up => true, Scroll::Not => false};
 
-
-
+            if self.action == FlipZAxis {
+                piece.rotate(Dir::Z, forwards);
+            } if self.action == FrontBack {
+                piece.test_move(field, Vec3::new(if self.scroll == Scroll::Up {1.0} else {-1.0}, 0.0, 0.0));
+                
+            } 
+        }
     }
 }

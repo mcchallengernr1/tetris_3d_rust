@@ -39,6 +39,14 @@ pub fn in_field(pos: [i32; 3]) -> bool {
     (0 <= pos[0] && CELLS_IN_X > pos[0]) && (0 <= pos[1] && CELLS_IN_Y > pos[1]) && (0 <= pos[2] && CELLS_IN_Z > pos[2])
 } 
 
+pub fn add_i32_vec(v1: [i32; 3], v2: [i32; 3]) -> [i32; 3] {
+    [v1[0] + v2[0], v1[1] + v2[1], v1[2] + v2[2]]
+}
+
+pub fn sub_i32_vec(v1: [i32; 3], v2: [i32; 3]) -> [i32; 3] {
+    [v1[0] - v2[0], v1[1] - v2[1], v1[2] - v2[2]]
+}
+
 pub trait Renderable {
     fn draw(&self, cam: &Camera);
     fn dist_to_pos(&self, pos: Vec3) -> f32;

@@ -1,7 +1,7 @@
 use crate::{cube::Cube, field::Field, utils::Movable};
 use macroquad::{color::Color, math::Vec3};
 use crate::field::{CELLS_IN_X, CELLS_IN_Y, CELLS_IN_Z};
-use crate::utils::{from_f32_to_i32, from_i32_to_f32, in_field, Dir};
+use crate::utils::{Dir, add_i32_vec, from_f32_to_i32, from_i32_to_f32, in_field, sub_i32_vec};
 
 const PIECE_CONFIG: [[[i32; 3]; 5]; 29]= [
     [[-2, 0, 0], [-1, 0, 0], [0, 0, 0], [1, 0, 0], [2, 0, 0]],
@@ -76,9 +76,9 @@ pub struct Piece {
 
 impl Piece {
     pub fn new(n: usize) -> Piece {
-        let pos = [CELLS_IN_X / 2, CELLS_IN_Y / 2, CELLS_IN_Z];
+        let pos = [CELLS_IN_X / 2, CELLS_IN_Y / 2, CELLS_IN_Z - 2];
         // let pos = [CELLS_IN_X / 2, CELLS_IN_Y / 2, CELLS_IN_Z / 2];
-        let cubes = PIECE_CONFIG[n].map(|cpos| Cube::new([cpos[0] + pos[0], cpos[1] + pos[1], cpos[2] + pos[2]], PIECE_COLOR[n]));
+        let cubes = PIECE_CONFIG[n].map(|cpos| Cube::new(add_i32_vec(cpos, pos), PIECE_COLOR[n]));
         Color::from_rgba(255, 255, 255, 255);
         Piece {
             _n: n,
@@ -91,7 +91,7 @@ impl Piece {
         let mut valid = true;
         for cube in &self.cubes {
             let new_pos = from_f32_to_i32(from_i32_to_f32(cube.pos) + mov);
-            if !in_field(new_pos) && field.taken_cube(new_pos) {
+            if !in_field(new_pos) || field.taken_cube(new_pos) {
                 valid = false;
             }
         }
@@ -101,11 +101,11 @@ impl Piece {
         }
     }
 
-    fn rotate(&mut self, axis: Dir, forwards: bool) {
+    pub fn rotate(&mut self, axis: Dir, forwards: bool) {
         let mut cubes_new_pos = [[0; 3]; 5];
 
         for i in 0..self.cubes.len() {
-            let relative_pos = [self.cubes[i].pos[0] - self.pos[0], self.cubes[i].pos[1] - self.pos[1], self.cubes[i].pos[2] - self.pos[2]];
+            let relative_pos = sub_i32_vec(self.cubes[i].pos, self.pos);
 
             cubes_new_pos[i] = match axis {
                 Dir::X => if forwards {[relative_pos[0], relative_pos[2], - relative_pos[1]]} else {[relative_pos[0], - relative_pos[2], relative_pos[1]]},
@@ -113,20 +113,10 @@ impl Piece {
                 Dir::Z => if forwards {[relative_pos[1], - relative_pos[0], relative_pos[2]]} else {[- relative_pos[1], relative_pos[0], relative_pos[2]]},
             };
         }
-        
-        
-        
-        
-        //if field.empty
-        //c.goto(
-        //);
 
-        //let mut x = 1;
-        //let mut y = 2; 
-        //let mut c: i32;
-        //if forwards {c = x; x = y; y = - c}  x est x et y est y
-        //else {c = x; x = - y; y = c}
-        
+        for i in 0..self.cubes.len() {
+            self.cubes[i].goto(add_i32_vec(cubes_new_pos[i], self.pos));
+        }
     }
 
 }
