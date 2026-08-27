@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use macroquad::math::Vec3;
 
 use crate::C_S;
+use crate::piece::Piece;
 use crate::{cube::Cube};
 use crate::line::{Line};
 use crate::utils::Dir;
@@ -48,8 +49,10 @@ impl<'a> Field<'a> {
         self.occupancy_grid[pos[2] as usize][pos[1] as usize][pos[0] as usize]
     }
 
-    pub fn add_cube(&mut self, cube: Cube) {
-        self.occupancy_grid[cube.pos[2] as usize][cube.pos[1] as usize][cube.pos[0] as usize] = true;
-        self.cubes.push(cube);
+    pub fn add_cubes(&mut self, piece: Piece) {
+        for c in piece.cubes {
+            self.occupancy_grid[c.pos[2] as usize][c.pos[1] as usize][c.pos[0] as usize] = true;
+            self.cubes.push(c);
+        }
     }
 }

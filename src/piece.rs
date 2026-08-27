@@ -1,7 +1,7 @@
 use crate::{cube::Cube, field::Field, utils::Movable};
 use macroquad::{color::Color, math::Vec3};
 use crate::field::{CELLS_IN_X, CELLS_IN_Y, CELLS_IN_Z};
-use crate::utils::{Dir, add_i32_vec, from_f32_to_i32, from_i32_to_f32, in_field, sub_i32_vec};
+use crate::utils::{Dir, add_i32_vec, from_i32_to_f32, in_field, sub_i32_vec};
 
 const PIECE_CONFIG: [[[i32; 3]; 5]; 29]= [
     [[-2, 0, 0], [-1, 0, 0], [0, 0, 0], [1, 0, 0], [2, 0, 0]],
@@ -71,7 +71,7 @@ const PIECE_COLOR: [Color; 29] = [
 pub struct Piece {
     pub _n: usize,
     pub cubes: [Cube; 5],
-    pub pos: [i32; 3],
+    pos: [i32; 3],
 }
 
 impl Piece {
@@ -87,38 +87,66 @@ impl Piece {
         }
     }
 
-    pub fn test_move(&mut self, field: &Field, mov: Vec3) {
+    pub fn test_move(&mut self, field: &Field, mov: [i32; 3]) -> bool {
         let mut valid = true;
         for cube in &self.cubes {
-            let new_pos = from_f32_to_i32(from_i32_to_f32(cube.pos) + mov);
+            let new_pos = add_i32_vec(cube.pos, mov);
             if !in_field(new_pos) || field.taken_cube(new_pos) {
                 valid = false;
             }
         }
 
-        if valid {
-            self.move_(mov)
-        }
+        if valid {self.move_(from_i32_to_f32(mov))};
+        
+        valid
     }
 
-    pub fn rotate(&mut self, axis: Dir, forwards: bool) {
+    pub fn test_rotate(&mut self, field: &Field, axis: Dir, forwards: bool) -> bool {
+        // Compute and test for possible rotation and corrections
         let mut cubes_new_pos = [[0; 3]; 5];
+        let mut valid = true;
+        let mut kickback: [i32; 2] = [0, 0];
 
         for i in 0..self.cubes.len() {
-            let relative_pos = sub_i32_vec(self.cubes[i].pos, self.pos);
+            let rel_pos = sub_i32_vec(self.cubes[i].pos, self.pos);
 
             cubes_new_pos[i] = match axis {
-                Dir::X => if forwards {[relative_pos[0], relative_pos[2], - relative_pos[1]]} else {[relative_pos[0], - relative_pos[2], relative_pos[1]]},
-                Dir::Y => if forwards {[- relative_pos[2], relative_pos[1], relative_pos[0]]} else {[relative_pos[2], relative_pos[1], - relative_pos[0]]},
-                Dir::Z => if forwards {[relative_pos[1], - relative_pos[0], relative_pos[2]]} else {[- relative_pos[1], relative_pos[0], relative_pos[2]]},
+                Dir::X => if forwards {[rel_pos[0], rel_pos[2], - rel_pos[1]]} else {[rel_pos[0], - rel_pos[2], rel_pos[1]]},
+                Dir::Y => if forwards {[- rel_pos[2], rel_pos[1], rel_pos[0]]} else {[rel_pos[2], rel_pos[1], - rel_pos[0]]},
+                Dir::Z => if forwards {[rel_pos[1], - rel_pos[0], rel_pos[2]]} else {[- rel_pos[1], rel_pos[0], rel_pos[2]]},
             };
+
+            if field.taken_cube(cubes_new_pos[i]) {valid = false}
+            else if !in_field(cubes_new_pos[i]) {
+                let new_x = if cubes_new_pos[i][0] < 0 {cubes_new_pos[i][0]} 
+                    else if cubes_new_pos[i][0] - CELLS_IN_X < 0 {cubes_new_pos[i][0] - CELLS_IN_X}
+                    else {0};
+                let new_y = if cubes_new_pos[i][1] < 0 {cubes_new_pos[i][1]} 
+                    else if cubes_new_pos[i][1] - CELLS_IN_Y < 0 {cubes_new_pos[i][1] - CELLS_IN_Y} 
+                    else {0};
+
+                kickback[0] = if new_x.abs() < kickback[0].abs() {kickback[0]} else {new_x};
+                kickback[1] = if new_y.abs() < kickback[1].abs() {kickback[1]} else {new_y};
+            }
         }
 
-        for i in 0..self.cubes.len() {
-            self.cubes[i].goto(add_i32_vec(cubes_new_pos[i], self.pos));
+        // Check kickback
+        if kickback != [0, 0] {
+            for c in &mut cubes_new_pos {
+                c[0] = c[0] + kickback[0];
+                c[1] = c[1] + kickback[1];
+            
+                if field.taken_cube(*c) {
+                    valid = false
+                }
+            }
         }
+
+        // Move cubes for valid condition
+        if valid {for i in 0..self.cubes.len() {self.cubes[i].goto(add_i32_vec(cubes_new_pos[i], self.pos))}};
+        
+        valid
     }
-
 }
 
 impl Movable for Piece {

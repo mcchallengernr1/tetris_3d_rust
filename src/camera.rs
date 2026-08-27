@@ -1,5 +1,3 @@
-use std::println;
-
 use macroquad::color::BLACK;
 use macroquad::math::Vec2;
 use macroquad::math::Vec3;
@@ -13,7 +11,7 @@ use crate::point::*;
 use crate::field::{CELLS_IN_X, CELLS_IN_Y, CELLS_IN_Z};
 
 pub struct Camera {
-    pub pos: Vec3,
+    pos: Vec3,
     orbit_center_pos: Vec3,
     radius: f32,
     focal_length: f32,

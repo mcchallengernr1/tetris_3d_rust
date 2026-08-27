@@ -9,14 +9,12 @@ mod line;
 mod piece;
 mod game_handler;
 
-use crate::cube::Cube;
 use crate::field::Field;
 use crate::camera::Camera;
 use crate::game_handler::GameHandler;
 use crate::utils::window_conf;
 use crate::piece::Piece;
 
-use macroquad::color::RED;
 use macroquad::prelude::{next_frame, screen_height, screen_width};
 
 const C_S: f32 = 1.0;
@@ -34,14 +32,19 @@ async fn main() {
 
     let mut field = Field::new(); 
 
-    field.add_cube(Cube::new([1, 1, 10], RED));
-
     while game_handler.running {
         // Events
         game_handler.events(&mut cam);
 
         // Logic
         game_handler.update_piece(cam.quadrant, &field, &mut piece);
+
+        if true {
+            if !piece.test_move(&field, [0, 0, -1]) {
+                field.add_cubes(piece);
+                piece = Piece::new(15);
+            }
+        }
 
 
         // Display
