@@ -1,5 +1,7 @@
+use crate::line::Line;
+use crate::utils::Dir::*;
 use crate::{cube::Cube, field::Field, utils::Movable};
-use macroquad::{color::Color, math::Vec3};
+use macroquad::{color::Color, math::Vec3, rand::gen_range};
 use crate::field::{CELLS_IN_X, CELLS_IN_Y, CELLS_IN_Z};
 use crate::utils::{Dir, add_i32_vec, from_i32_to_f32, in_field, sub_i32_vec};
 
@@ -72,18 +74,28 @@ pub struct Piece {
     pub _n: usize,
     pub cubes: [Cube; 5],
     pos: [i32; 3],
+    pub axies: [Line; 3],
 }
 
 impl Piece {
     pub fn new(n: usize) -> Piece {
         let pos = [CELLS_IN_X / 2, CELLS_IN_Y / 2, CELLS_IN_Z - 2];
-        // let pos = [CELLS_IN_X / 2, CELLS_IN_Y / 2, CELLS_IN_Z / 2];
-        let cubes = PIECE_CONFIG[n].map(|cpos| Cube::new(add_i32_vec(cpos, pos), PIECE_COLOR[n]));
-        Color::from_rgba(255, 255, 255, 255);
+
+        let new_n: usize = if n > 29 {gen_range(0, 29)} else {n};
+
+        let cubes = PIECE_CONFIG[new_n].map(|cpos| Cube::new(add_i32_vec(cpos, pos), PIECE_COLOR[new_n]));
+
+        let axies = [
+            Line::new(from_i32_to_f32(pos) + Vec3::new(-4.0, 0.5, 0.5), 9, X, Color::from_rgba(255, 0, 0, 255)),
+            Line::new(from_i32_to_f32(pos) + Vec3::new(0.5, -4.0, 0.5), 9, Y, Color::from_rgba(0, 255, 0, 255)),
+            Line::new(from_i32_to_f32(pos) + Vec3::new(0.5, 0.5, -4.0), 9, Z, Color::from_rgba(0, 0, 255, 255)),
+        ];
+        
         Piece {
-            _n: n,
+            _n: new_n,
             cubes,
-            pos
+            pos,
+            axies
         }
     }
 
@@ -99,6 +111,16 @@ impl Piece {
         if valid {self.move_(from_i32_to_f32(mov))};
         
         valid
+    }
+
+    pub fn turn_off_axies(&mut self) {
+        self.axies.iter_mut().for_each(|l| l.on = false);
+    }
+
+    pub fn turn_on_axies(&mut self, i: usize) {
+        if i < 3 {
+            self.axies[i].on = true;
+        }
     }
 
     pub fn test_rotate(&mut self, field: &Field, axis: Dir, forwards: bool) -> bool {
@@ -151,8 +173,6 @@ impl Piece {
 
 impl Movable for Piece {
     fn move_(&mut self, movement: Vec3) {
-        for c in &mut self.cubes {
-            c.move_(movement);
-        }
+        self.cubes.iter_mut().for_each(|c| c.move_(movement));
     }
 }

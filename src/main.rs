@@ -15,7 +15,7 @@ use crate::game_handler::GameHandler;
 use crate::utils::window_conf;
 use crate::piece::Piece;
 
-use macroquad::prelude::{next_frame, screen_height, screen_width};
+use macroquad::{color::PURPLE, prelude::{next_frame, screen_height, screen_width}};
 
 const C_S: f32 = 1.0;
 const C_H_S: f32 = C_S / 2.0;
@@ -28,9 +28,9 @@ async fn main() {
     cam.update_internal_vars();
 
 
-    let mut piece = Piece::new(20);
+    let mut piece = Piece::new(30);
 
-    let mut field = Field::new(); 
+    let mut field = Field::new(PURPLE); 
 
     while game_handler.running {
         // Events
@@ -42,7 +42,7 @@ async fn main() {
         if true {
             if !piece.test_move(&field, [0, 0, -1]) {
                 field.add_cubes(piece);
-                piece = Piece::new(15);
+                piece = Piece::new(30);
             }
         }
 

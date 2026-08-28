@@ -73,6 +73,16 @@ impl GameHandler {
     }
 
     pub fn update_piece(&self, quadrant: i32, field: &Field, piece: &mut Piece){
+        piece.turn_off_axies();
+        piece.turn_on_axies(match self.action {
+            FlipFBAxis => if quadrant == 7 || quadrant == 0 || quadrant == 3 || quadrant == 4 {1} else {0},
+            FlipLRAxis => if quadrant == 7 || quadrant == 0 || quadrant == 3 || quadrant == 4 {0} else {1},
+            LeftRight => if quadrant == 7 || quadrant == 0 || quadrant == 3 || quadrant == 4 {1} else {0},
+            FrontBack => if quadrant == 7 || quadrant == 0 || quadrant == 3 || quadrant == 4 {0} else {1},
+            FlipZAxis => 2,
+            NoAction => 4,
+        });
+
         if self.action != NoAction && self.scroll != Scroll::Not {
             let forwards = match self.scroll {Scroll::Down => false, Scroll::Up => true, Scroll::Not => false};
 
