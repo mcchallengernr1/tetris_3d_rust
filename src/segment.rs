@@ -4,7 +4,7 @@ use macroquad::{color::Color, math::Vec3, shapes::draw_line};
 pub struct Segment {
     points: [Point; 2],
     mid_pos: Vec3,
-    color: Color,
+    pub color: Color,
 }
 
 impl<'a> Segment {

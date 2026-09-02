@@ -23,10 +23,11 @@ const C_H_S: f32 = C_S / 2.0;
 #[macroquad::main(window_conf)]
 async fn main() {
 
-    let mut game_handler = GameHandler::new();
+    let mut game_handler = GameHandler::new(true);
     let mut cam = Camera::new(screen_width(), screen_height());
     cam.update_internal_vars();
 
+    let mut frames: u32 = 0;
 
     let mut piece = Piece::new(30);
 
@@ -39,7 +40,9 @@ async fn main() {
         // Logic
         game_handler.update_piece(cam.quadrant, &field, &mut piece);
 
-        if true {
+        frames += 1;
+
+        if frames % 10 == 0 && !game_handler.paused {
             if !piece.test_move(&field, [0, 0, -1]) {
                 field.add_cubes(piece);
                 piece = Piece::new(30);
@@ -51,6 +54,8 @@ async fn main() {
         cam.clear_screen();
 
         cam.draw(&piece, &field);
+
+        cam.display_text();
         
         next_frame().await
     }

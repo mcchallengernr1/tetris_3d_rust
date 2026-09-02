@@ -26,22 +26,22 @@ impl<'a> Field<'a> {
         let mut grid = Vec::new();
 
         for i in 0..=CELLS_IN_X {
-            grid.push(Line::new(Vec3::new(i as f32 * C_S, 0.0, 0.0), CELLS_IN_Y as u32, Dir::Y, line_color))
+            grid.push(Line::new(Vec3::new(i as f32 * C_S, 0.0, 0.0), CELLS_IN_Y as u32, Dir::Y, line_color, true))
         }
         for j in 0..=CELLS_IN_Y {
-            grid.push(Line::new(Vec3::new(0.0, j as f32 * C_S, 0.0), CELLS_IN_X as u32, Dir::X, line_color));
+            grid.push(Line::new(Vec3::new(0.0, j as f32 * C_S, 0.0), CELLS_IN_X as u32, Dir::X, line_color, true));
         }
 
         Field { cubes: Vec::<Cube>::new(),
             outline: HashMap::from([
-            ("xm_ym", Line::new(Vec3::ZERO, CELLS_IN_Z as u32, Dir::Z, line_color)),
-            ("xp_ym", Line::new(Vec3::new(CELLS_IN_X as f32, 0.0, 0.0), CELLS_IN_Z as u32, Dir::Z, line_color)),
-            ("xm_yp", Line::new(Vec3::new(0.0, CELLS_IN_Y as f32, 0.0), CELLS_IN_Z as u32, Dir::Z, line_color)),
-            ("xp_yp", Line::new(Vec3::new(CELLS_IN_X as f32, CELLS_IN_Y as f32, 0.0), CELLS_IN_Z as u32, Dir::Z, line_color)),
-            ("t_xm", Line::new(Vec3::new(0.0, 0.0, CELLS_IN_Z as f32), CELLS_IN_Y as u32, Dir::Y, line_color)),
-            ("t_xp", Line::new(Vec3::new(CELLS_IN_X as f32, 0.0, CELLS_IN_Z as f32), CELLS_IN_Y as u32, Dir::Y, line_color)),
-            ("t_ym", Line::new(Vec3::new(0.0, 0.0, CELLS_IN_Z as f32), CELLS_IN_X as u32, Dir::X, line_color)),
-            ("t_yp", Line::new(Vec3::new(0.0, CELLS_IN_Y as f32, CELLS_IN_Z as f32), CELLS_IN_X as u32, Dir::X, line_color))]),
+            ("xm_ym", Line::new(Vec3::ZERO, CELLS_IN_Z as u32, Dir::Z, line_color, true)),
+            ("xp_ym", Line::new(Vec3::new(CELLS_IN_X as f32, 0.0, 0.0), CELLS_IN_Z as u32, Dir::Z, line_color, true)),
+            ("xm_yp", Line::new(Vec3::new(0.0, CELLS_IN_Y as f32, 0.0), CELLS_IN_Z as u32, Dir::Z, line_color, true)),
+            ("xp_yp", Line::new(Vec3::new(CELLS_IN_X as f32, CELLS_IN_Y as f32, 0.0), CELLS_IN_Z as u32, Dir::Z, line_color, true)),
+            ("t_xm", Line::new(Vec3::new(0.0, 0.0, CELLS_IN_Z as f32), CELLS_IN_Y as u32, Dir::Y, line_color, true)),
+            ("t_xp", Line::new(Vec3::new(CELLS_IN_X as f32, 0.0, CELLS_IN_Z as f32), CELLS_IN_Y as u32, Dir::Y, line_color, true)),
+            ("t_ym", Line::new(Vec3::new(0.0, 0.0, CELLS_IN_Z as f32), CELLS_IN_X as u32, Dir::X, line_color, true)),
+            ("t_yp", Line::new(Vec3::new(0.0, CELLS_IN_Y as f32, CELLS_IN_Z as f32), CELLS_IN_X as u32, Dir::X, line_color, true))]),
             grid,
             occupancy_grid: [[[false; CELLS_IN_X as usize]; CELLS_IN_Y as usize]; CELLS_IN_Z as usize],
             _line_color: line_color,
@@ -49,6 +49,7 @@ impl<'a> Field<'a> {
     }
 
     pub fn taken_cube(&self, pos: [i32; 3]) -> bool {
+        println!("{:?}", pos);
         self.occupancy_grid[pos[2] as usize][pos[1] as usize][pos[0] as usize]
     }
 

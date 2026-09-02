@@ -22,7 +22,7 @@ pub fn from_i32_to_f32(pos: [i32; 3]) -> Vec3 {
     Vec3::new(pos[0] as f32, pos[1] as f32, pos[2] as f32)
 }
 
-pub fn _from_f32_to_i32(pos: Vec3) -> [i32; 3] {
+pub fn from_f32_to_i32(pos: Vec3) -> [i32; 3] {
     [pos[0].floor() as i32, pos[1].floor() as i32, pos[2].floor() as i32]
 }
 

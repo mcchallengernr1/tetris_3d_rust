@@ -1,7 +1,8 @@
-use macroquad::color::BLACK;
+use macroquad::color::{BLACK, WHITE};
 use macroquad::math::Vec2;
 use macroquad::math::Vec3;
 use macroquad::window::clear_background;
+use macroquad::prelude::draw_text;
 
 use crate::cube::Cube;
 use crate::utils::{Renderable, Direction, Direction::*};
@@ -125,6 +126,8 @@ impl Camera {
 
         cubes.iter().for_each(|c| c.draw(self));
 
+        piece.axies.iter().for_each(|l| if l.on {l.draw(&self);});
+
         // Postdraw
         if !top_predraw {
             field.outline["t_xm"].draw(self);
@@ -137,5 +140,9 @@ impl Camera {
         if !xm_yp_predraw {field.outline["xm_yp"].draw(self);}
         if !xp_ym_predraw {field.outline["xp_ym"].draw(self);}
         if !xp_yp_predraw {field.outline["xp_yp"].draw(self);}
+    }
+
+    pub fn display_text (&self) {
+        draw_text(format!("quadrant: {}", self.quadrant), 10.0, 30.0, 40.0, WHITE);
     }
 }

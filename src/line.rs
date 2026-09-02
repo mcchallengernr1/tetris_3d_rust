@@ -13,7 +13,7 @@ pub struct Line {
 }
 
 impl Line {
-    pub fn new(pos: Vec3, length: u32, dir: Dir, color: Color) -> Line {
+    pub fn new(pos: Vec3, length: u32, dir: Dir, color: Color, on: bool) -> Line {
         let mut segments = Vec::new();
         let mid_pos = match &dir {
             Dir::X => Vec3 { x: pos[0] + (length) as f32 / 2.0, y: pos[1], z: pos[2] },
@@ -29,7 +29,12 @@ impl Line {
             };
             segments.push(Segment::new(Point::new(point_pos[0]), Point::new(point_pos[1]), color));    
         }
-        Line { segments, mid_pos, on: true, _color: color }
+        Line { segments, mid_pos, on: on, _color: color }
+    }
+
+    pub fn change_color(&mut self, color: Color) {
+        self._color = color;
+        self.segments.iter_mut().for_each(|s| s.color = color);
     }
 }
 
