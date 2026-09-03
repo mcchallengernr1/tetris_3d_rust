@@ -2,7 +2,7 @@ use crate::line::Line;
 use crate::utils::{from_f32_to_i32, Dir::*};
 use crate::{cube::Cube, field::Field, utils::Movable};
 use macroquad::{color::Color, math::Vec3, rand::gen_range};
-use crate::field::{CELLS_IN_X, CELLS_IN_Y, CELLS_IN_Z};
+use crate::{CELLS_IN_X, CELLS_IN_Y, CELLS_IN_Z};
 use crate::utils::{Dir, add_i32_vec, from_i32_to_f32, in_field, sub_i32_vec};
 
 const PIECE_CONFIG: [[[i32; 3]; 5]; 29]= [

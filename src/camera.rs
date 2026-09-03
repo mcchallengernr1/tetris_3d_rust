@@ -1,6 +1,7 @@
 use macroquad::color::{BLACK, WHITE};
 use macroquad::math::Vec2;
 use macroquad::math::Vec3;
+use macroquad::time::get_time;
 use macroquad::window::clear_background;
 use macroquad::prelude::draw_text;
 
@@ -9,7 +10,7 @@ use crate::utils::{Renderable, Direction, Direction::*};
 use crate::field::Field;
 use crate::piece::Piece;
 use crate::point::*;
-use crate::field::{CELLS_IN_X, CELLS_IN_Y, CELLS_IN_Z};
+use crate::{CELLS_IN_X, CELLS_IN_Y, CELLS_IN_Z};
 
 pub struct Camera {
     pos: Vec3,
@@ -24,6 +25,9 @@ pub struct Camera {
     azimuth_uv: Vec3,
     spherical_mov_multiplier: f32,
     pub quadrant: i32,
+    last_time: f64,
+    frames: u32,
+    fps: u32,
 }
 
 impl Camera {
@@ -38,8 +42,11 @@ impl Camera {
         let azimuth_uv = Vec3::ZERO;
         let spherical_mov_multiplier = width / 300.0;
         let quadrant = 0;
+        let last_time = get_time();
+        let frames = 0;
+        let fps = 0;
 
-        Camera {pos, orbit_center_pos, radius, focal_length, width, height, inclination, azimuth, polar_uv, azimuth_uv, spherical_mov_multiplier, quadrant }
+        Camera {pos, orbit_center_pos, radius, focal_length, width, height, inclination, azimuth, polar_uv, azimuth_uv, spherical_mov_multiplier, quadrant, last_time, frames, fps }
     }
     
     pub fn project(&self, p: &Point) -> Vec2 {
@@ -87,8 +94,10 @@ impl Camera {
         }
     }
 
-    pub fn clear_screen(&self) {
+    pub fn clear_screen(&mut self) {
         clear_background(BLACK);
+        
+        self.frames += 1;
     }
 
     pub fn draw(&self, piece: &Piece, field: &Field) {
@@ -142,7 +151,13 @@ impl Camera {
         if !xp_yp_predraw {field.outline["xp_yp"].draw(self);}
     }
 
-    pub fn display_text (&self) {
-        draw_text(format!("quadrant: {}", self.quadrant), 10.0, 30.0, 40.0, WHITE);
+    pub fn display_text (&mut self) {
+        let now = get_time();
+        if self.last_time + 1.0 < now {
+            self.last_time = now;
+            self.fps = self.frames;
+            self.frames = 0;
+        }
+        draw_text(format!("FPS: {0}\nquadrant: {1}", self.fps, self.quadrant), 10.0, 30.0, 40.0, WHITE);
     }
 }

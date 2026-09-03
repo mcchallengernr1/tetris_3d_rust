@@ -11,7 +11,7 @@ pub struct Face {
     mid_pos: Vec3,
     segment_color: Color,
     direction: Direction,
-    on: bool,
+    pub on: bool,
     color: Color
 }
 

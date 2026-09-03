@@ -20,6 +20,10 @@ use macroquad::{color::PURPLE, prelude::{next_frame, screen_height, screen_width
 const C_S: f32 = 1.0;
 const C_H_S: f32 = C_S / 2.0;
 
+pub const CELLS_IN_X: i32 = 9;
+pub const CELLS_IN_Y: i32 = 9;
+pub const CELLS_IN_Z: i32 = 20;
+
 #[macroquad::main(window_conf)]
 async fn main() {
 
@@ -32,6 +36,7 @@ async fn main() {
     let mut piece = Piece::new(30);
 
     let mut field = Field::new(PURPLE); 
+    // field.fill_field(1);
 
     while game_handler.running {
         // Events
@@ -44,12 +49,13 @@ async fn main() {
 
         if frames % 10 == 0 && !game_handler.paused {
             if !piece.test_move(&field, [0, 0, -1]) {
-                field.add_cubes(piece);
+                field.add_piece(piece);
                 piece = Piece::new(30);
             }
         }
 
 
+        
         // Display
         cam.clear_screen();
 

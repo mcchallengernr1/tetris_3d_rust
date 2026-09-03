@@ -5,8 +5,9 @@ use crate::utils::{Movable, Renderable, Direction::*};
 use macroquad::color::Color;
 use macroquad::math::Vec3;
 
+
 pub struct Cube {
-    faces: [Face; 6],
+    pub faces: [Face; 6],
     pub pos: [i32; 3],
     mid_pos: Vec3,
 }
@@ -19,7 +20,7 @@ impl Cube {
             Face::new(pos, YMinus, color),
             Face::new(pos, YPlus, color),
             Face::new(pos, ZMinus, color),
-            Face::new(pos, ZPlus, color),];
+            Face::new(pos, ZPlus, color)];
 
         let mid_pos = Vec3::new(pos[0] as f32 + C_H_S,pos[1] as f32 + C_H_S, pos[2] as f32 + C_H_S);
 
