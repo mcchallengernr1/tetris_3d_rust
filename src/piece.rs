@@ -1,9 +1,10 @@
+use std::array;
 use crate::line::Line;
-use crate::utils::{from_f32_to_i32, Dir::*};
-use crate::{cube::Cube, field::Field, utils::Movable};
+use crate::utils::{Axis::*, Movable};
+use crate::{cube::Cube, field::Field};
 use macroquad::{color::Color, math::Vec3, rand::gen_range};
-use crate::{CELLS_IN_X, CELLS_IN_Y, CELLS_IN_Z};
-use crate::utils::{Dir, add_i32_vec, from_i32_to_f32, in_field, sub_i32_vec};
+use crate::{AXIS_LENGTH, CELLS_IN_X, CELLS_IN_Y, CELLS_IN_Z};
+use crate::utils::{Axis, add_i32_vec, from_i32_to_f32, in_field, sub_i32_vec};
 
 const PIECE_CONFIG: [[[i32; 3]; 5]; 29]= [
     [[-2, 0, 0], [-1, 0, 0], [0, 0, 0], [1, 0, 0], [2, 0, 0]],
@@ -69,7 +70,7 @@ const PIECE_COLOR: [Color; 29] = [
 
 
 pub struct Piece {
-    pub _n: usize,
+    pub n: usize,
     pub cubes: [Cube; 5],
     pos: [i32; 3],
     pub axies: [Line; 3],
@@ -77,27 +78,29 @@ pub struct Piece {
 
 impl Piece {
     pub fn new(n: usize) -> Piece {
-        let pos = [CELLS_IN_X / 2, CELLS_IN_Y / 2, CELLS_IN_Z - 2];
+        let pos = [(CELLS_IN_X / 2) as i32, (CELLS_IN_Y / 2) as i32, (CELLS_IN_Z - 2) as i32];
 
-        let new_n: usize = if n > 29 {gen_range(0, 29)} else {n};
-
-        let cubes = PIECE_CONFIG[new_n].map(|cpos| Cube::new(add_i32_vec(cpos, pos), PIECE_COLOR[new_n]));
+        let cubes = PIECE_CONFIG[n].map(|cpos| Cube::new(add_i32_vec(cpos, pos), PIECE_COLOR[n]));
 
         let axies = [
-            Line::new(from_i32_to_f32(pos) + Vec3::new(-4.0, 0.5, 0.5), 9, X, Color::from_rgba(255, 0, 0, 255), false),
-            Line::new(from_i32_to_f32(pos) + Vec3::new(0.5, -4.0, 0.5), 9, Y, Color::from_rgba(0, 255, 0, 255), false),
-            Line::new(from_i32_to_f32(pos) + Vec3::new(0.5, 0.5, -4.0), 9, Z, Color::from_rgba(0, 0, 255, 255), false),
+            Line::new(from_i32_to_f32(pos) + Vec3::new(-4.0, 0.5, 0.5), AXIS_LENGTH, X, Color::from_rgba(255, 0, 0, 255), false),
+            Line::new(from_i32_to_f32(pos) + Vec3::new(0.5, -4.0, 0.5), AXIS_LENGTH, Y, Color::from_rgba(0, 255, 0, 255), false),
+            Line::new(from_i32_to_f32(pos) + Vec3::new(0.5, 0.5, -4.0), AXIS_LENGTH, Z, Color::from_rgba(0, 0, 255, 255), false),
         ];
         
         Piece {
-            _n: new_n,
+            n,
             cubes,
             pos,
             axies
         }
     }
 
-    pub fn test_move(&mut self, field: &Field, mov: [i32; 3]) -> bool {
+    pub fn new_random() -> Piece {
+        Piece::new(gen_range(0, 29))
+    }
+
+    pub fn try_move(&mut self, field: &Field, mov: [i32; 3]) -> bool {
         let mut valid = true;
         for cube in &self.cubes {
             let new_pos = add_i32_vec(cube.pos, mov);
@@ -106,7 +109,7 @@ impl Piece {
             }
         }
 
-        if valid {self.move_(from_i32_to_f32(mov))};
+        if valid {self.move_(mov)};
         
         valid
     }
@@ -121,43 +124,33 @@ impl Piece {
         }
     }
 
-    pub fn test_rotate(&mut self, field: &Field, axis: Dir, forwards: bool) -> bool {
+    pub fn try_rotate(&mut self, field: &Field, axis: Axis, forwards: bool) -> bool {
         // Compute and test for possible rotation and corrections
-        let mut cubes_new_pos = [[0; 3]; 5];
+
+        let mut cubes_new_pos: [[i32; 3]; 5] = array::from_fn(|i| {
+            self.turn_cube_pos(sub_i32_vec(self.cubes[i].pos, self.pos), &axis, forwards)
+        });
+
         let mut valid = true;
         let mut kickback: [i32; 2] = [0, 0];
 
-        for i in 0..self.cubes.len() {
-            let rel_pos = sub_i32_vec(self.cubes[i].pos, self.pos);
-
-            cubes_new_pos[i] = match axis {
-                Dir::X => if forwards {[rel_pos[0], rel_pos[2], - rel_pos[1]]} else {[rel_pos[0], - rel_pos[2], rel_pos[1]]},
-                Dir::Y => if forwards {[- rel_pos[2], rel_pos[1], rel_pos[0]]} else {[rel_pos[2], rel_pos[1], - rel_pos[0]]},
-                Dir::Z => if forwards {[rel_pos[1], - rel_pos[0], rel_pos[2]]} else {[- rel_pos[1], rel_pos[0], rel_pos[2]]},
-            };
-
-            cubes_new_pos[i] = add_i32_vec(cubes_new_pos[i], self.pos);
-
-            if cubes_new_pos[i][2] >= CELLS_IN_Z || cubes_new_pos[i][2] < 0 {valid = false}
-            else if field.taken_cube(cubes_new_pos[i]) {valid = false}
-            else if !in_field(cubes_new_pos[i]) {
-                let new_x = if cubes_new_pos[i][0] < 0 {cubes_new_pos[i][0]} 
-                    else if cubes_new_pos[i][0] - CELLS_IN_X < 0 {cubes_new_pos[i][0] - CELLS_IN_X}
-                    else {0};
-                let new_y = if cubes_new_pos[i][1] < 0 {cubes_new_pos[i][1]} 
-                    else if cubes_new_pos[i][1] - CELLS_IN_Y < 0 {cubes_new_pos[i][1] - CELLS_IN_Y} 
-                    else {0};
-
-                kickback[0] = if new_x.abs() < kickback[0].abs() {kickback[0]} else {new_x};
-                kickback[1] = if new_y.abs() < kickback[1].abs() {kickback[1]} else {new_y};
+        for c in cubes_new_pos {
+            if c[2] >= CELLS_IN_Z as i32|| c[2] < 0 {valid = false}
+            else if !in_field(c) {
+                let x: i32 = if c[0] < 0 {- c[0]} else if c[0] >= CELLS_IN_X as i32 {CELLS_IN_X as i32 - 1 - c[0]} else {0};
+                let y: i32 = if c[1] < 0 {- c[1]} else if c[1] >= CELLS_IN_Y as i32 {CELLS_IN_Y as i32 - 1 - c[1]} else {0};
+                
+                if x.abs() > kickback[0].abs() {kickback[0] = x};
+                if y.abs() > kickback[1].abs() {kickback[1] = y};
             }
+            else if field.taken_cube(c) {valid = false}
         }
 
         // Check kickback
-        if kickback != [0, 0] {
+        if valid && kickback != [0, 0] {
             for c in &mut cubes_new_pos {
-                c[0] = c[0] + kickback[0];
-                c[1] = c[1] + kickback[1];
+                c[0] += kickback[0];
+                c[1] += kickback[1];
             
                 if field.taken_cube(*c) {
                     valid = false
@@ -166,17 +159,29 @@ impl Piece {
         }
 
         // Move cubes for valid condition
-        if valid {for i in 0..self.cubes.len() {self.cubes[i].goto(cubes_new_pos[i])}};
-        
+        if valid {
+            self.move_([kickback[0], kickback[1], 0]);
+
+            self.cubes
+                .iter_mut()
+                .enumerate()
+                .for_each(|(i, c)| c.goto(cubes_new_pos[i]));
+        }
+
         valid
     }
-}
 
-impl Movable for Piece {
-    fn move_(&mut self, movement: Vec3) {
-        self.cubes.iter_mut().for_each(|c| c.move_(movement));
-        self.axies.iter_mut().for_each(|l| l.move_(movement));
-        self.pos = add_i32_vec(self.pos, from_f32_to_i32(movement))
-        
+    fn turn_cube_pos(&self, pos: [i32; 3], axis: &Axis, forwards: bool) -> [i32; 3] {
+        add_i32_vec(self.pos, match axis {
+                Axis::X => if forwards {[pos[0], - pos[2], pos[1]]} else {[pos[0], pos[2], - pos[1]]},
+                Axis::Y => if forwards {[pos[2], pos[1], - pos[0]]} else {[- pos[2], pos[1], pos[0]]},
+                Axis::Z => if forwards {[- pos[1], pos[0], pos[2]]} else {[pos[1], - pos[0], pos[2]]},
+            })
+    }
+
+    fn move_(&mut self, mov: [i32; 3]) {
+        self.pos = add_i32_vec(self.pos, mov);
+        self.cubes.iter_mut().for_each(|c| c.move_(mov));
+        self.axies.iter_mut().for_each(|l| l.move_(from_i32_to_f32(mov)));
     }
 }

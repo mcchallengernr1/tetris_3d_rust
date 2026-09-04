@@ -1,7 +1,7 @@
 use crate::face::Face;
 use crate::camera::Camera;
 use crate::C_H_S;
-use crate::utils::{Movable, Renderable, Direction::*};
+use crate::utils::{FaceNormal::*, Movable, Renderable, add_i32_vec, from_i32_to_f32};
 use macroquad::color::Color;
 use macroquad::math::Vec3;
 
@@ -27,7 +27,14 @@ impl Cube {
         Cube { faces , pos , mid_pos }
     }
     pub fn goto(&mut self, pos: [i32; 3]) {
-        self.move_(Vec3::new((pos[0] - self.pos[0]) as f32,(pos[1] - self.pos[1]) as f32,(pos[2] - self.pos[2]) as f32,))
+        self.move_([pos[0] - self.pos[0], pos[1] - self.pos[1], pos[2] - self.pos[2]])
+    }
+
+    pub fn move_(&mut self, mov: [i32; 3]) {
+        let movement = from_i32_to_f32(mov);
+        self.mid_pos += movement;
+        self.faces.iter_mut().for_each(|f| f.move_(movement));
+        self.pos = add_i32_vec(self.pos, mov)
     }
 }
 
@@ -38,15 +45,5 @@ impl Renderable for Cube {
 
     fn dist_to_pos(&self, pos: Vec3) -> f32 {
         (self.mid_pos - pos).length()
-    }
-}
-
-impl Movable for Cube {
-    fn move_(&mut self, movement: Vec3) {
-        self.mid_pos += movement;
-        for f in &mut self.faces {
-            f.move_(movement)
-        }
-        self.pos = [self.pos[0] + movement[0].floor() as i32, self.pos[1] + movement[1].floor() as i32, self.pos[2] + movement[2].floor() as i32]
     }
 }

@@ -7,7 +7,7 @@ pub struct Segment {
     pub color: Color,
 }
 
-impl<'a> Segment {
+impl Segment {
     pub fn new(p1: Point, p2: Point, color: Color) -> Segment {
         let mid_pos = (p1.pos + p2.pos) / 2.0;
         Segment { points: [p1, p2], 

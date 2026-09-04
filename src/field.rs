@@ -1,46 +1,55 @@
-use std::collections::HashMap;
-
 use macroquad::color::{Color, GRAY};
 use macroquad::math::Vec3;
 use macroquad::rand::gen_range;
 
 use crate::C_S;
 use crate::piece::Piece;
-use crate::utils::{Direction::*, in_field};
+use crate::utils::{FaceNormal::*, in_field};
 use crate::{cube::Cube};
 use crate::line::{Line};
-use crate::utils::Dir;
+use crate::utils::Axis;
 use crate::{CELLS_IN_X, CELLS_IN_Y, CELLS_IN_Z};
 
-pub struct Field<'a> {
+pub struct Field {
     pub cubes: Vec<Cube>,
-    pub outline: HashMap<&'a str, Line>,
+    pub outline: Outline,
     pub grid: Vec<Line>,
     occupancy_grid: [[[bool; CELLS_IN_X as usize]; CELLS_IN_Y as usize]; CELLS_IN_Z as usize],
     _line_color: Color,
 }
 
-impl<'a> Field<'a> {
-    pub fn new(line_color: Color) -> Field<'a> {
+pub struct Outline {
+    pub xm_ym: Line,
+    pub xp_ym: Line,
+    pub xm_yp: Line,
+    pub xp_yp: Line,
+    pub t_xm: Line,
+    pub t_xp: Line,
+    pub t_ym: Line,
+    pub t_yp: Line,
+}
+
+impl Field {
+    pub fn new(line_color: Color) -> Field {
         let mut grid = Vec::new();
 
         for i in 0..=CELLS_IN_X {
-            grid.push(Line::new(Vec3::new(i as f32 * C_S, 0.0, 0.0), CELLS_IN_Y as u32, Dir::Y, line_color, true))
+            grid.push(Line::new(Vec3::new(i as f32 * C_S, 0.0, 0.0), CELLS_IN_Y, Axis::Y, line_color, true))
         }
         for j in 0..=CELLS_IN_Y {
-            grid.push(Line::new(Vec3::new(0.0, j as f32 * C_S, 0.0), CELLS_IN_X as u32, Dir::X, line_color, true));
+            grid.push(Line::new(Vec3::new(0.0, j as f32 * C_S, 0.0), CELLS_IN_X, Axis::X, line_color, true));
         }
 
         Field { cubes: Vec::<Cube>::new(),
-            outline: HashMap::from([
-            ("xm_ym", Line::new(Vec3::ZERO, CELLS_IN_Z as u32, Dir::Z, line_color, true)),
-            ("xp_ym", Line::new(Vec3::new(CELLS_IN_X as f32, 0.0, 0.0), CELLS_IN_Z as u32, Dir::Z, line_color, true)),
-            ("xm_yp", Line::new(Vec3::new(0.0, CELLS_IN_Y as f32, 0.0), CELLS_IN_Z as u32, Dir::Z, line_color, true)),
-            ("xp_yp", Line::new(Vec3::new(CELLS_IN_X as f32, CELLS_IN_Y as f32, 0.0), CELLS_IN_Z as u32, Dir::Z, line_color, true)),
-            ("t_xm", Line::new(Vec3::new(0.0, 0.0, CELLS_IN_Z as f32), CELLS_IN_Y as u32, Dir::Y, line_color, true)),
-            ("t_xp", Line::new(Vec3::new(CELLS_IN_X as f32, 0.0, CELLS_IN_Z as f32), CELLS_IN_Y as u32, Dir::Y, line_color, true)),
-            ("t_ym", Line::new(Vec3::new(0.0, 0.0, CELLS_IN_Z as f32), CELLS_IN_X as u32, Dir::X, line_color, true)),
-            ("t_yp", Line::new(Vec3::new(0.0, CELLS_IN_Y as f32, CELLS_IN_Z as f32), CELLS_IN_X as u32, Dir::X, line_color, true))]),
+            outline: Outline {
+            xm_ym: Line::new(Vec3::ZERO, CELLS_IN_Z, Axis::Z, line_color, true),
+            xp_ym: Line::new(Vec3::new(CELLS_IN_X as f32, 0.0, 0.0), CELLS_IN_Z, Axis::Z, line_color, true),
+            xm_yp: Line::new(Vec3::new(0.0, CELLS_IN_Y as f32, 0.0), CELLS_IN_Z, Axis::Z, line_color, true),
+            xp_yp: Line::new(Vec3::new(CELLS_IN_X as f32, CELLS_IN_Y as f32, 0.0), CELLS_IN_Z, Axis::Z, line_color, true),
+            t_xm: Line::new(Vec3::new(0.0, 0.0, CELLS_IN_Z as f32), CELLS_IN_Y, Axis::Y, line_color, true),
+            t_xp: Line::new(Vec3::new(CELLS_IN_X as f32, 0.0, CELLS_IN_Z as f32), CELLS_IN_Y, Axis::Y, line_color, true),
+            t_ym: Line::new(Vec3::new(0.0, 0.0, CELLS_IN_Z as f32), CELLS_IN_X, Axis::X, line_color, true),
+            t_yp: Line::new(Vec3::new(0.0, CELLS_IN_Y as f32, CELLS_IN_Z as f32), CELLS_IN_X, Axis::X, line_color, true)},
             grid,
             occupancy_grid: [[[false; CELLS_IN_X as usize]; CELLS_IN_Y as usize]; CELLS_IN_Z as usize],
             _line_color: line_color,
@@ -75,12 +84,12 @@ impl<'a> Field<'a> {
         }
     }
 
-    pub fn _fill_field(&mut self, pourcent: u8) {
+    pub fn _fill_field_to_percent(&mut self, percent: u8) {
         let mut cubes: Vec<Cube> = Vec::new();
-        for k in 0..CELLS_IN_Z {
-            for j in 0..CELLS_IN_Y {
-                for i in 0..CELLS_IN_X {
-                    if gen_range(1, 100) <= pourcent {
+        for k in 0..CELLS_IN_Z as i32 {
+            for j in 0..CELLS_IN_Y as i32 {
+                for i in 0..CELLS_IN_X as i32 {
+                    if gen_range(1, 100) <= percent {
                         cubes.push(Cube::new([i, j, k], GRAY));
                     }
                 }
