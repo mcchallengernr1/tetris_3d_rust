@@ -1,5 +1,5 @@
 use macroquad::color::{GREEN, RED};
-use macroquad::math::Vec2;
+use macroquad::math::{IVec3, Vec2};
 
 use macroquad::{input::{MouseButton, is_mouse_button_down, mouse_position_local, mouse_wheel}, prelude::{KeyCode, is_key_pressed, is_key_down}};
 
@@ -92,26 +92,26 @@ impl GameHandler {
                 piece.try_rotate(field, Axis::Z, forwards);
             } else {
                 if quadrant == 7 || quadrant == 0 {
-                    if self.action == LeftRight {piece.try_move(field, [0, if forwards {1} else {-1}, 0]);}
-                    else if self.action == FrontBack {piece.try_move(field, [if forwards {-1} else {1}, 0, 0]);}
+                    if self.action == LeftRight {piece.try_move(field, IVec3::ZERO.with_y(if forwards {1} else {-1}));}
+                    else if self.action == FrontBack {piece.try_move(field, IVec3::ZERO.with_x(if forwards {-1} else {1}));}
                     else if self.action == FlipFBAxis {piece.try_rotate(field, Axis::Y, !forwards);}
                     else if self.action == FlipLRAxis {piece.try_rotate(field, Axis::X, forwards);}
                 
                 } else if quadrant == 1 || quadrant == 2 {
-                    if self.action == LeftRight {piece.try_move(field, [if forwards {-1} else {1}, 0, 0]);}
-                    else if self.action == FrontBack {piece.try_move(field, [0, if forwards {-1} else {1}, 0]);}
+                    if self.action == LeftRight {piece.try_move(field, IVec3::ZERO.with_x(if forwards {-1} else {1}));}
+                    else if self.action == FrontBack {piece.try_move(field, IVec3::ZERO.with_y(if forwards {-1} else {1}));}
                     else if self.action == FlipFBAxis {piece.try_rotate(field, Axis::X, forwards);}
                     else if self.action == FlipLRAxis {piece.try_rotate(field, Axis::Y, forwards);}
 
                 } else if quadrant == 3 || quadrant == 4 {
-                    if self.action == LeftRight {piece.try_move(field, [0, if forwards {-1} else {1}, 0]);}
-                    else if self.action == FrontBack {piece.try_move(field, [if forwards {1} else {-1}, 0, 0]);}
+                    if self.action == LeftRight {piece.try_move(field, IVec3::ZERO.with_y(if forwards {-1} else {1}));}
+                    else if self.action == FrontBack {piece.try_move(field, IVec3::ZERO.with_x(if forwards {1} else {-1}));}
                     else if self.action == FlipFBAxis {piece.try_rotate(field, Axis::Y, forwards);}
                     else if self.action == FlipLRAxis {piece.try_rotate(field, Axis::X, !forwards);}
 
                 } else {
-                    if self.action == LeftRight {piece.try_move(field, [if forwards {1} else {-1}, 0, 0]);}
-                    else if self.action == FrontBack {piece.try_move(field, [0, if forwards {1} else {-1}, 0]);}
+                    if self.action == LeftRight {piece.try_move(field, IVec3::ZERO.with_x(if forwards {1} else {-1}));}
+                    else if self.action == FrontBack {piece.try_move(field, IVec3::ZERO.with_y(if forwards {1} else {-1}));}
                     else if self.action == FlipFBAxis {piece.try_rotate(field, Axis::X, !forwards);}
                     else if self.action == FlipLRAxis {piece.try_rotate(field, Axis::Y, !forwards);}
                 }

@@ -1,10 +1,10 @@
-use macroquad::{color::Color, prelude::{Vec2, Vec3}, shapes::{draw_line, draw_triangle}};
+use macroquad::{color::Color, math::IVec3, prelude::{Vec2, Vec3}, shapes::{draw_line, draw_triangle}};
 
 
 use crate::{point::*, utils::Movable};
 use crate::{C_H_S,C_S};
 use crate::camera::Camera;
-use crate::utils::{FaceNormal, FaceNormal::*, Renderable,from_i32_to_f32};
+use crate::utils::{FaceNormal, FaceNormal::*, Renderable};
 
 pub struct Face {
     points: [Point; 4],
@@ -16,20 +16,20 @@ pub struct Face {
 }
 
 impl Face {
-    pub fn new(pos: [i32; 3], normal: FaceNormal, color: Color) -> Face {
+    pub fn new(pos: IVec3, normal: FaceNormal, color: Color) -> Face {
 
-        let mut mid_pos = from_i32_to_f32(pos);
+        let mut mid_pos = pos.as_vec3();
 
         let poses = match normal {
-            XMinus => {mid_pos[1] += C_H_S; mid_pos[2] += C_H_S; [pos, [pos[0], pos[1], pos[2] + 1], [pos[0], pos[1] + 1, pos[2] + 1], [pos[0], pos[1] + 1, pos[2]]]},
-            XPlus => {mid_pos[0] += C_S; mid_pos[1] += C_H_S; mid_pos[2] += C_H_S; [[pos[0] + 1, pos[1], pos[2]], [pos[0] + 1, pos[1] + 1, pos[2]], [pos[0] + 1, pos[1] + 1, pos[2] + 1], [pos[0] + 1, pos[1], pos[2] + 1]]},
-            YMinus => {mid_pos[0] += C_H_S; mid_pos[2] += C_H_S; [pos, [pos[0] + 1, pos[1], pos[2]], [pos[0] + 1, pos[1], pos[2] + 1], [pos[0], pos[1], pos[2] + 1]]},
-            YPlus => {mid_pos[0] += C_H_S; mid_pos[1] += C_S; mid_pos[2] += C_H_S; [[pos[0], pos[1] + 1, pos[2]], [pos[0], pos[1] + 1, pos[2] + 1], [pos[0] + 1, pos[1] + 1, pos[2] + 1], [pos[0] + 1, pos[1] + 1, pos[2]]]},
-            ZMinus => {mid_pos[0] += C_H_S; mid_pos[1] += C_H_S; [pos, [pos[0], pos[1] + 1, pos[2]], [pos[0] + 1, pos[1] + 1, pos[2]], [pos[0] + 1, pos[1], pos[2]]]}
-            ZPlus => {mid_pos[0] += C_H_S; mid_pos[1] += C_H_S; mid_pos[2] += C_S; [[pos[0], pos[1], pos[2] + 1], [pos[0] + 1, pos[1], pos[2] + 1], [pos[0] + 1, pos[1] + 1, pos[2] + 1], [pos[0], pos[1] + 1, pos[2] + 1]]}
+            XMinus => {mid_pos[1] += C_H_S; mid_pos[2] += C_H_S; [pos, IVec3::new(pos[0], pos[1], pos[2] + 1), IVec3::new(pos[0], pos[1] + 1, pos[2] + 1), IVec3::new(pos[0], pos[1] + 1, pos[2])]},
+            XPlus => {mid_pos[0] += C_S; mid_pos[1] += C_H_S; mid_pos[2] += C_H_S; [IVec3::new(pos[0] + 1, pos[1], pos[2]), IVec3::new(pos[0] + 1, pos[1] + 1, pos[2]), IVec3::new(pos[0] + 1, pos[1] + 1, pos[2] + 1), IVec3::new(pos[0] + 1, pos[1], pos[2] + 1)]},
+            YMinus => {mid_pos[0] += C_H_S; mid_pos[2] += C_H_S; [pos, IVec3::new(pos[0] + 1, pos[1], pos[2]), IVec3::new(pos[0] + 1, pos[1], pos[2] + 1), IVec3::new(pos[0], pos[1], pos[2] + 1)]},
+            YPlus => {mid_pos[0] += C_H_S; mid_pos[1] += C_S; mid_pos[2] += C_H_S; [IVec3::new(pos[0], pos[1] + 1, pos[2]), IVec3::new(pos[0], pos[1] + 1, pos[2] + 1), IVec3::new(pos[0] + 1, pos[1] + 1, pos[2] + 1), IVec3::new(pos[0] + 1, pos[1] + 1, pos[2])]},
+            ZMinus => {mid_pos[0] += C_H_S; mid_pos[1] += C_H_S; [pos, IVec3::new(pos[0], pos[1] + 1, pos[2]), IVec3::new(pos[0] + 1, pos[1] + 1, pos[2]), IVec3::new(pos[0] + 1, pos[1], pos[2])]}
+            ZPlus => {mid_pos[0] += C_H_S; mid_pos[1] += C_H_S; mid_pos[2] += C_S; [IVec3::new(pos[0], pos[1], pos[2] + 1), IVec3::new(pos[0] + 1, pos[1], pos[2] + 1), IVec3::new(pos[0] + 1, pos[1] + 1, pos[2] + 1), IVec3::new(pos[0], pos[1] + 1, pos[2] + 1)]}
         };
 
-        let points = [Point::new(from_i32_to_f32(poses[0])), Point::new(from_i32_to_f32(poses[1])), Point::new(from_i32_to_f32(poses[2])), Point::new(from_i32_to_f32(poses[3]))];
+        let points = [Point::new(poses[0].as_vec3()), Point::new(poses[1].as_vec3()), Point::new(poses[2].as_vec3()), Point::new(poses[3].as_vec3())];
 
         let segment_color = Color::new(1.0, 1.0, 1.0, 1.0);
         Face {points, mid_pos, segment_color, normal, on: true , color}

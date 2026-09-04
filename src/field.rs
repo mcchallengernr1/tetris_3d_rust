@@ -1,5 +1,5 @@
 use macroquad::color::{Color, GRAY};
-use macroquad::math::Vec3;
+use macroquad::math::{Vec3, IVec3};
 use macroquad::rand::gen_range;
 
 use crate::C_S;
@@ -56,7 +56,7 @@ impl Field {
         }
     }
 
-    pub fn taken_cube(&self, pos: [i32; 3]) -> bool {
+    pub fn taken_cube(&self, pos: IVec3) -> bool {
         self.occupancy_grid[pos[2] as usize][pos[1] as usize][pos[0] as usize]
     }
 
@@ -75,14 +75,22 @@ impl Field {
 
     fn disable_hidden_faces(&mut self) {
         for c in &mut self.cubes {
-            c.faces[ZMinus.to_index()].on = if !in_field([c.pos[0], c.pos[1], c.pos[2] - 1]) {true} else {!self.occupancy_grid[(c.pos[2] - 1)as usize][c.pos[1] as usize][c.pos[0] as usize]};
-            c.faces[ZPlus.to_index()].on = if !in_field([c.pos[0], c.pos[1], c.pos[2] + 1]) {true} else {!self.occupancy_grid[(c.pos[2] + 1)as usize][c.pos[1] as usize][c.pos[0] as usize]};
-            c.faces[YMinus.to_index()].on = if !in_field([c.pos[0], c.pos[1] - 1, c.pos[2]]) {true} else {!self.occupancy_grid[(c.pos[2])as usize][(c.pos[1] - 1) as usize][c.pos[0] as usize]};
-            c.faces[YPlus.to_index()].on = if !in_field([c.pos[0], c.pos[1] + 1, c.pos[2]]) {true} else {!self.occupancy_grid[(c.pos[2])as usize][(c.pos[1] + 1) as usize][c.pos[0] as usize]};
-            c.faces[XMinus.to_index()].on = if !in_field([c.pos[0] - 1, c.pos[1], c.pos[2]]) {true} else {!self.occupancy_grid[(c.pos[2])as usize][c.pos[1] as usize][(c.pos[0] - 1) as usize]};
-            c.faces[XPlus.to_index()].on = if !in_field([c.pos[0] + 1, c.pos[1], c.pos[2]]) {true} else {!self.occupancy_grid[(c.pos[2])as usize][c.pos[1] as usize][(c.pos[0] + 1) as usize]};
+            c.faces[ZMinus.to_index()].on = if !in_field(c.pos.with_z(c.pos.z - 1)) {true} else {!self.occupancy_grid[(c.pos[2] - 1)as usize][c.pos[1] as usize][c.pos[0] as usize]};
+            c.faces[ZPlus.to_index()].on = if !in_field(c.pos.with_z(c.pos.z + 1)) {true} else {!self.occupancy_grid[(c.pos[2] + 1)as usize][c.pos[1] as usize][c.pos[0] as usize]};
+            c.faces[YMinus.to_index()].on = if !in_field(c.pos.with_y(c.pos.y - 1)) {true} else {!self.occupancy_grid[(c.pos[2])as usize][(c.pos[1] - 1) as usize][c.pos[0] as usize]};
+            c.faces[YPlus.to_index()].on = if !in_field(c.pos.with_y(c.pos.y + 1)) {true} else {!self.occupancy_grid[(c.pos[2])as usize][(c.pos[1] + 1) as usize][c.pos[0] as usize]};
+            c.faces[XMinus.to_index()].on = if !in_field(c.pos.with_x(c.pos.x - 1)) {true} else {!self.occupancy_grid[(c.pos[2])as usize][c.pos[1] as usize][(c.pos[0] - 1) as usize]};
+            c.faces[XPlus.to_index()].on = if !in_field(c.pos.with_x(c.pos.x + 1)) {true} else {!self.occupancy_grid[(c.pos[2])as usize][c.pos[1] as usize][(c.pos[0] + 1) as usize]};
+            // c.faces[ZMinus.to_index()].on = if !in_field([c.pos[0], c.pos[1], c.pos[2] - 1]) {true} else {!self.occupancy_grid[(c.pos[2] - 1)as usize][c.pos[1] as usize][c.pos[0] as usize]};
+            // c.faces[ZPlus.to_index()].on = if !in_field([c.pos[0], c.pos[1], c.pos[2] + 1]) {true} else {!self.occupancy_grid[(c.pos[2] + 1)as usize][c.pos[1] as usize][c.pos[0] as usize]};
+            // c.faces[YMinus.to_index()].on = if !in_field([c.pos[0], c.pos[1] - 1, c.pos[2]]) {true} else {!self.occupancy_grid[(c.pos[2])as usize][(c.pos[1] - 1) as usize][c.pos[0] as usize]};
+            // c.faces[YPlus.to_index()].on = if !in_field([c.pos[0], c.pos[1] + 1, c.pos[2]]) {true} else {!self.occupancy_grid[(c.pos[2])as usize][(c.pos[1] + 1) as usize][c.pos[0] as usize]};
+            // c.faces[XMinus.to_index()].on = if !in_field([c.pos[0] - 1, c.pos[1], c.pos[2]]) {true} else {!self.occupancy_grid[(c.pos[2])as usize][c.pos[1] as usize][(c.pos[0] - 1) as usize]};
+            // c.faces[XPlus.to_index()].on = if !in_field([c.pos[0] + 1, c.pos[1], c.pos[2]]) {true} else {!self.occupancy_grid[(c.pos[2])as usize][c.pos[1] as usize][(c.pos[0] + 1) as usize]};
+
         }
     }
+    
 
     pub fn _fill_field_to_percent(&mut self, percent: u8) {
         let mut cubes: Vec<Cube> = Vec::new();
@@ -90,7 +98,7 @@ impl Field {
             for j in 0..CELLS_IN_Y as i32 {
                 for i in 0..CELLS_IN_X as i32 {
                     if gen_range(1, 100) <= percent {
-                        cubes.push(Cube::new([i, j, k], GRAY));
+                        cubes.push(Cube::new(IVec3::new(i, j, k), GRAY));
                     }
                 }
             }

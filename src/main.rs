@@ -15,7 +15,7 @@ use crate::game_handler::GameHandler;
 use crate::utils::window_conf;
 use crate::piece::Piece;
 
-use macroquad::{color::PURPLE, prelude::next_frame, rand, miniquad};
+use macroquad::{color::PURPLE, prelude::next_frame, rand, miniquad::date::now, math::IVec3};
 
 const C_S: f32 = 1.0;
 const C_H_S: f32 = C_S / 2.0;
@@ -29,7 +29,7 @@ const AXIS_LENGTH: usize = 9;
 
 #[macroquad::main(window_conf)]
 async fn main() {
-    rand::srand(miniquad::date::now() as u64);
+    rand::srand(now() as u64);
     
     let mut game_handler = GameHandler::new(true);
     let mut cam = Camera::new();
@@ -51,7 +51,7 @@ async fn main() {
 
         frames += 1;
 
-        if frames.is_multiple_of(100) && !game_handler.paused && !piece.try_move(&field, [0, 0, -1]) {
+        if frames.is_multiple_of(100) && !game_handler.paused && !piece.try_move(&field, IVec3::ZERO.with_y(-1)) {
             field.add_piece(piece);
             piece = Piece::new_random();
         }

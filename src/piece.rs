@@ -2,9 +2,9 @@ use std::array;
 use crate::line::Line;
 use crate::utils::{Axis::*, Movable};
 use crate::{cube::Cube, field::Field};
-use macroquad::{color::Color, math::Vec3, rand::gen_range};
+use macroquad::{color::Color, math::{Vec3, IVec3}, rand::gen_range};
 use crate::{AXIS_LENGTH, CELLS_IN_X, CELLS_IN_Y, CELLS_IN_Z};
-use crate::utils::{Axis, add_i32_vec, from_i32_to_f32, in_field, sub_i32_vec};
+use crate::utils::{Axis, in_field};
 
 const PIECE_CONFIG: [[[i32; 3]; 5]; 29]= [
     [[-2, 0, 0], [-1, 0, 0], [0, 0, 0], [1, 0, 0], [2, 0, 0]],
@@ -72,20 +72,20 @@ const PIECE_COLOR: [Color; 29] = [
 pub struct Piece {
     pub n: usize,
     pub cubes: [Cube; 5],
-    pos: [i32; 3],
+    pos: IVec3,
     pub axies: [Line; 3],
 }
 
 impl Piece {
     pub fn new(n: usize) -> Piece {
-        let pos = [(CELLS_IN_X / 2) as i32, (CELLS_IN_Y / 2) as i32, (CELLS_IN_Z - 2) as i32];
+        let pos = IVec3::new((CELLS_IN_X / 2) as i32, (CELLS_IN_Y / 2) as i32, (CELLS_IN_Z - 2) as i32);
 
-        let cubes = PIECE_CONFIG[n].map(|cpos| Cube::new(add_i32_vec(cpos, pos), PIECE_COLOR[n]));
+        let cubes = PIECE_CONFIG[n].map(|cpos| Cube::new(IVec3::from_array(cpos) + pos, PIECE_COLOR[n]));
 
         let axies = [
-            Line::new(from_i32_to_f32(pos) + Vec3::new(-4.0, 0.5, 0.5), AXIS_LENGTH, X, Color::from_rgba(255, 0, 0, 255), false),
-            Line::new(from_i32_to_f32(pos) + Vec3::new(0.5, -4.0, 0.5), AXIS_LENGTH, Y, Color::from_rgba(0, 255, 0, 255), false),
-            Line::new(from_i32_to_f32(pos) + Vec3::new(0.5, 0.5, -4.0), AXIS_LENGTH, Z, Color::from_rgba(0, 0, 255, 255), false),
+            Line::new(pos.as_vec3() + Vec3::new(-4.0, 0.5, 0.5), AXIS_LENGTH, X, Color::from_rgba(255, 0, 0, 255), false),
+            Line::new(pos.as_vec3() + Vec3::new(0.5, -4.0, 0.5), AXIS_LENGTH, Y, Color::from_rgba(0, 255, 0, 255), false),
+            Line::new(pos.as_vec3() + Vec3::new(0.5, 0.5, -4.0), AXIS_LENGTH, Z, Color::from_rgba(0, 0, 255, 255), false),
         ];
         
         Piece {
@@ -100,10 +100,10 @@ impl Piece {
         Piece::new(gen_range(0, 29))
     }
 
-    pub fn try_move(&mut self, field: &Field, mov: [i32; 3]) -> bool {
+    pub fn try_move(&mut self, field: &Field, mov: IVec3) -> bool {
         let mut valid = true;
         for cube in &self.cubes {
-            let new_pos = add_i32_vec(cube.pos, mov);
+            let new_pos = cube.pos + mov;
             if !in_field(new_pos) || field.taken_cube(new_pos) {
                 valid = false;
             }
@@ -127,8 +127,8 @@ impl Piece {
     pub fn try_rotate(&mut self, field: &Field, axis: Axis, forwards: bool) -> bool {
         // Compute and test for possible rotation and corrections
 
-        let mut cubes_new_pos: [[i32; 3]; 5] = array::from_fn(|i| {
-            self.turn_cube_pos(sub_i32_vec(self.cubes[i].pos, self.pos), &axis, forwards)
+        let mut cubes_new_pos: [IVec3; 5] = array::from_fn(|i| {
+            self.turn_cube_pos(self.cubes[i].pos - self.pos, &axis, forwards)
         });
 
         let mut valid = true;
@@ -160,7 +160,7 @@ impl Piece {
 
         // Move cubes for valid condition
         if valid {
-            self.move_([kickback[0], kickback[1], 0]);
+            self.move_(IVec3::new(kickback[0], kickback[1], 0));
 
             self.cubes
                 .iter_mut()
@@ -171,17 +171,17 @@ impl Piece {
         valid
     }
 
-    fn turn_cube_pos(&self, pos: [i32; 3], axis: &Axis, forwards: bool) -> [i32; 3] {
-        add_i32_vec(self.pos, match axis {
-                Axis::X => if forwards {[pos[0], - pos[2], pos[1]]} else {[pos[0], pos[2], - pos[1]]},
-                Axis::Y => if forwards {[pos[2], pos[1], - pos[0]]} else {[- pos[2], pos[1], pos[0]]},
-                Axis::Z => if forwards {[- pos[1], pos[0], pos[2]]} else {[pos[1], - pos[0], pos[2]]},
-            })
+    fn turn_cube_pos(&self, pos: IVec3, axis: &Axis, forwards: bool) -> IVec3 {
+        self.pos + match axis {
+                Axis::X => if forwards {IVec3::new(pos[0], - pos[2], pos[1])} else {IVec3::new(pos[0], pos[2], - pos[1])},
+                Axis::Y => if forwards {IVec3::new(pos[2], pos[1], - pos[0])} else {IVec3::new(- pos[2], pos[1], pos[0])},
+                Axis::Z => if forwards {IVec3::new(- pos[1], pos[0], pos[2])} else {IVec3::new(pos[1], - pos[0], pos[2])},
+            }
     }
 
-    fn move_(&mut self, mov: [i32; 3]) {
-        self.pos = add_i32_vec(self.pos, mov);
+    fn move_(&mut self, mov: IVec3) {
+        self.pos = self.pos + mov;
         self.cubes.iter_mut().for_each(|c| c.move_(mov));
-        self.axies.iter_mut().for_each(|l| l.move_(from_i32_to_f32(mov)));
+        self.axies.iter_mut().for_each(|l| l.move_(mov.as_vec3()));
     }
 }
