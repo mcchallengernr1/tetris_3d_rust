@@ -5,6 +5,7 @@ use crate::camera::Camera;
 use crate::{CELLS_IN_X, CELLS_IN_Y, CELLS_IN_Z};
 use FaceNormal::*;
 
+#[derive(PartialEq)]
 pub enum FaceNormal {
     XPlus,
     XMinus,

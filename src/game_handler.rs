@@ -1,5 +1,6 @@
 use macroquad::color::{GREEN, RED};
 use macroquad::math::{IVec3, Vec2};
+use macroquad::time::get_time;
 
 use macroquad::{input::{MouseButton, is_mouse_button_down, mouse_position_local, mouse_wheel}, prelude::{KeyCode, is_key_pressed, is_key_down}};
 
@@ -34,11 +35,17 @@ pub struct GameHandler {
     scroll: Scroll,
     action: Action,
     pub paused: bool,
-
+    last_frame_time: f64,
+    counted_frames: u32,
+    fps: u32,
+    pub sinks: bool,
+    last_sink_time: f64,
+    time_until_next_sink: f64,
 }
 
 impl GameHandler {
     pub fn new(paused: bool) -> GameHandler {
+        let now = get_time();
         GameHandler {
             running: true,
             mouse_pos: Vec2::ZERO,
@@ -46,18 +53,25 @@ impl GameHandler {
             mouse_displacement: Vec2::ZERO,
             scroll: Scroll::Not,
             action: Action::None,
-            paused
+            paused,
+            last_frame_time: now,
+            counted_frames: 0,
+            fps: 0,
+            sinks: false,
+            last_sink_time: now,
+            time_until_next_sink: 1.0,
         }
     }
 
     pub fn events(&mut self, cam: &mut Camera) {
         self.mouse_pos = mouse_position_local();
         self.mouse_displacement = self.last_mouse_pos - self.mouse_pos;
+        if self.mouse_displacement.x.abs() > 0.2 || self.mouse_displacement.y.abs() > 0.2 {self.mouse_displacement = Vec2::ZERO}
         self.last_mouse_pos = self.mouse_pos;
 
-        if is_key_pressed(KeyCode::Tab) || is_key_pressed(KeyCode::Escape) {self.running = false;}
-        if is_key_pressed(KeyCode::Space) {self.paused = !self.paused;}
-        if is_mouse_button_down(MouseButton::Left) {cam.spherical_movement(self.mouse_displacement);}
+        if is_key_pressed(KeyCode::Tab) || is_key_pressed(KeyCode::Escape) {self.running = false};
+        if is_key_pressed(KeyCode::Space) {self.paused = !self.paused};
+        if is_mouse_button_down(MouseButton::Left) {cam.spherical_movement(self.mouse_displacement)};
 
         self.scroll = match mouse_wheel().1 {
             -1.0 => Scroll::Down,
@@ -124,5 +138,34 @@ impl GameHandler {
             piece.axies[0].change_color(GREEN);
             piece.axies[1].change_color(RED);
         }
+    }
+
+    pub fn regulate_speed(&mut self) {
+        
+        let now = get_time();
+
+        // Measure fps
+        self.counted_frames += 1;
+        if self.last_frame_time + 1.0 < now {
+            self.last_frame_time = now;
+            self.fps = self.counted_frames;
+            self.counted_frames = 0;
+        }
+
+        // Defines sinks
+        self.sinks = false;
+
+        if self.last_sink_time + self.time_until_next_sink < now {
+            self.last_sink_time = now;
+            self.sinks = true;
+            self.time_until_next_sink = self.get_time_until_next_sink();
+        }   
+    }
+
+    pub fn get_fps(&self) -> u32 {self.fps}
+
+    pub fn get_time_until_next_sink(&self) -> f64 {
+        // Placeholder value since the game is too incomplete to balance it now
+        1.0
     }
 }

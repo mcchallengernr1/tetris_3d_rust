@@ -1,8 +1,6 @@
-- face render changes based on orientation + implement drawn axies
+- change render pipeline for cubes + implement drawn axies
 - line clear
-- add mouse speed max to avoid jumps
 - game over detection
-- implement correct gravity speed
 - add menus
 - add next piece showcase
 - points system

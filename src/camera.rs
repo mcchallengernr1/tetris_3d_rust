@@ -1,7 +1,6 @@
 use macroquad::color::{BLACK, WHITE};
 use macroquad::math::Vec2;
 use macroquad::math::Vec3;
-use macroquad::time::get_time;
 use macroquad::window::{clear_background, screen_height, screen_width};
 use macroquad::prelude::draw_text;
 
@@ -24,9 +23,6 @@ pub struct Camera {
     azimuth_uv: Vec3,
     spherical_mov_multiplier: f32,
     pub quadrant: i32,
-    last_time: f64,
-    counted_frames: u32,
-    fps: u32,
 }
 
 impl Camera {
@@ -43,11 +39,8 @@ impl Camera {
         let azimuth_uv = Vec3::ZERO;
         let spherical_mov_multiplier = width / 300.0;
         let quadrant = 0;
-        let last_time = get_time();
-        let counted_frames = 0;
-        let fps = 0;
 
-        Camera {pos, orbit_center_pos, radius, focal_length, width, height, inclination, azimuth, polar_uv, azimuth_uv, spherical_mov_multiplier, quadrant, last_time, counted_frames, fps }
+        Camera {pos, orbit_center_pos, radius, focal_length, width, height, inclination, azimuth, polar_uv, azimuth_uv, spherical_mov_multiplier, quadrant }
     }
     
     pub fn project(&self, pos: Vec3) -> Vec2 {
@@ -60,8 +53,6 @@ impl Camera {
     pub fn update_internal_vars(&mut self) {
         self.width = screen_width();
         self.height = screen_height();
-        
-        self.counted_frames += 1;
 
         let az_cos = self.azimuth.cos();
         let incl_cos = self.inclination.cos();
@@ -158,13 +149,7 @@ impl Camera {
         if !xp_yp_predraw {field.outline.xp_yp.draw(self);}
     }
 
-    pub fn display_text (&mut self, piece: &Piece) {
-        let now = get_time();
-        if self.last_time + 1.0 < now {
-            self.last_time = now;
-            self.fps = self.counted_frames;
-            self.counted_frames = 0;
-        }
-        draw_text(format!("FPS: {0}\nquadrant: {1}\nPiece: {2}", self.fps, self.quadrant, piece.n), 10.0, 30.0, 40.0, WHITE);
+    pub fn display_text (&mut self, piece: &Piece, fps: u32) {
+        draw_text(format!("FPS: {0}  quadrant: {1}  Piece: {2}", fps, self.quadrant, piece.n), 10.0, 30.0, 40.0, WHITE);
     }
 }

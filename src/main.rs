@@ -20,9 +20,9 @@ use macroquad::{color::PURPLE, prelude::next_frame, rand, miniquad::date::now, m
 const C_S: f32 = 1.0;
 const C_H_S: f32 = C_S / 2.0;
 
-pub const CELLS_IN_X: usize = 9;
-pub const CELLS_IN_Y: usize = 9;
-pub const CELLS_IN_Z: usize = 20;
+const CELLS_IN_X: usize = 7;
+const CELLS_IN_Y: usize = 7;
+const CELLS_IN_Z: usize = 20;
 
 const CAMERA_RADIUS: f32 = 50.0;
 const AXIS_LENGTH: usize = 9;
@@ -35,8 +35,6 @@ async fn main() {
     let mut cam = Camera::new();
     cam.update_internal_vars();
 
-    let mut frames: u32 = 0;
-
     let mut piece = Piece::new_random();
 
     let mut field = Field::new(PURPLE); 
@@ -47,11 +45,11 @@ async fn main() {
         game_handler.events(&mut cam);
 
         // Logic
+        game_handler.regulate_speed();
+
         game_handler.update_piece(cam.quadrant, &field, &mut piece);
 
-        frames += 1;
-
-        if frames.is_multiple_of(100) && !game_handler.paused && !piece.try_move(&field, IVec3::ZERO.with_z(-1)) {
+        if game_handler.sinks && !piece.try_move(&field, IVec3::ZERO.with_z(-1)) {
             field.add_piece(piece);
             piece = Piece::new_random();
         }
@@ -64,7 +62,7 @@ async fn main() {
 
         cam.draw(&piece, &field);
 
-        cam.display_text(&piece);
+        cam.display_text(&piece, game_handler.get_fps());
         
         next_frame().await
     }

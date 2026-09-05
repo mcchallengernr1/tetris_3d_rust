@@ -29,10 +29,25 @@ impl Face {
             ZPlus => {mid_pos[0] += C_H_S; mid_pos[1] += C_H_S; mid_pos[2] += C_S; [IVec3::new(pos[0], pos[1], pos[2] + 1), IVec3::new(pos[0] + 1, pos[1], pos[2] + 1), IVec3::new(pos[0] + 1, pos[1] + 1, pos[2] + 1), IVec3::new(pos[0], pos[1] + 1, pos[2] + 1)]}
         };
 
+
+
+        let mut new_color = color;
+        let x_darken_factor = 1.3;
+        let y_darken_factor = 1.6;
+        let zm_darken_factor = 2.5;
+        
+        if normal == XMinus || normal == XPlus {
+            new_color = Color { r: color.r / x_darken_factor, g: color.g / x_darken_factor, b: color.b / x_darken_factor, a: color.a };
+        } else if normal == YMinus || normal == YPlus {
+            new_color = Color { r: color.r / y_darken_factor, g: color.g / y_darken_factor, b: color.b / y_darken_factor, a: color.a };
+        } else if normal == ZMinus {
+            new_color = Color { r: color.r / zm_darken_factor, g: color.g / zm_darken_factor, b: color.b / zm_darken_factor, a: color.a };
+        }
+
         let points = [Point::new(poses[0].as_vec3()), Point::new(poses[1].as_vec3()), Point::new(poses[2].as_vec3()), Point::new(poses[3].as_vec3())];
 
         let segment_color = Color::new(1.0, 1.0, 1.0, 1.0);
-        Face {points, mid_pos, segment_color, normal, on: true , color}
+        Face {points, mid_pos, segment_color, normal, on: true , color: new_color}
     }
 }
 
