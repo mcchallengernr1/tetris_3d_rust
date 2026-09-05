@@ -51,7 +51,7 @@ async fn main() {
 
         frames += 1;
 
-        if frames.is_multiple_of(100) && !game_handler.paused && !piece.try_move(&field, IVec3::ZERO.with_y(-1)) {
+        if frames.is_multiple_of(100) && !game_handler.paused && !piece.try_move(&field, IVec3::ZERO.with_z(-1)) {
             field.add_piece(piece);
             piece = Piece::new_random();
         }

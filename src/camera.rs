@@ -9,7 +9,6 @@ use crate::cube::Cube;
 use crate::utils::{Renderable, FaceNormal, FaceNormal::*};
 use crate::field::Field;
 use crate::piece::Piece;
-use crate::point::*;
 use crate::{CELLS_IN_X, CELLS_IN_Y, CELLS_IN_Z, CAMERA_RADIUS};
 
 pub struct Camera {
@@ -51,8 +50,8 @@ impl Camera {
         Camera {pos, orbit_center_pos, radius, focal_length, width, height, inclination, azimuth, polar_uv, azimuth_uv, spherical_mov_multiplier, quadrant, last_time, counted_frames, fps }
     }
     
-    pub fn project(&self, p: &Point) -> Vec2 {
-        let unit_v = (p.pos - self.pos).normalize() * self.focal_length;
+    pub fn project(&self, pos: Vec3) -> Vec2 {
+        let unit_v = (pos - self.pos).normalize() * self.focal_length;
 
         Vec2::new(Vec3::dot(unit_v, self.azimuth_uv) * self.height + self.width / 2.0,
         Vec3::dot(unit_v, self.polar_uv) * self.height + self.height / 2.0)

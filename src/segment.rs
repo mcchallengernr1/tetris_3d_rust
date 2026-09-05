@@ -18,8 +18,8 @@ impl Segment {
 
 impl Renderable for Segment {
     fn draw(&self, cam: &Camera) {
-        let p0 = cam.project(&self.points[0]);
-        let p1 = cam.project(&self.points[1]);
+        let p0 = cam.project(self.points[0].pos);
+        let p1 = cam.project(self.points[1].pos);
         draw_line(p0[0], p0[1], p1[0], p1[1], 1.0, self.color);
     }
     

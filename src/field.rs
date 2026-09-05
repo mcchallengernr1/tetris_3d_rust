@@ -14,7 +14,7 @@ pub struct Field {
     pub cubes: Vec<Cube>,
     pub outline: Outline,
     pub grid: Vec<Line>,
-    occupancy_grid: [[[bool; CELLS_IN_X as usize]; CELLS_IN_Y as usize]; CELLS_IN_Z as usize],
+    occupancy_grid: [[[bool; CELLS_IN_X]; CELLS_IN_Y]; CELLS_IN_Z],
     _line_color: Color,
 }
 
@@ -51,7 +51,7 @@ impl Field {
             t_ym: Line::new(Vec3::new(0.0, 0.0, CELLS_IN_Z as f32), CELLS_IN_X, Axis::X, line_color, true),
             t_yp: Line::new(Vec3::new(0.0, CELLS_IN_Y as f32, CELLS_IN_Z as f32), CELLS_IN_X, Axis::X, line_color, true)},
             grid,
-            occupancy_grid: [[[false; CELLS_IN_X as usize]; CELLS_IN_Y as usize]; CELLS_IN_Z as usize],
+            occupancy_grid: [[[false; CELLS_IN_X]; CELLS_IN_Y]; CELLS_IN_Z],
             _line_color: line_color,
         }
     }
@@ -81,13 +81,6 @@ impl Field {
             c.faces[YPlus.to_index()].on = if !in_field(c.pos.with_y(c.pos.y + 1)) {true} else {!self.occupancy_grid[(c.pos[2])as usize][(c.pos[1] + 1) as usize][c.pos[0] as usize]};
             c.faces[XMinus.to_index()].on = if !in_field(c.pos.with_x(c.pos.x - 1)) {true} else {!self.occupancy_grid[(c.pos[2])as usize][c.pos[1] as usize][(c.pos[0] - 1) as usize]};
             c.faces[XPlus.to_index()].on = if !in_field(c.pos.with_x(c.pos.x + 1)) {true} else {!self.occupancy_grid[(c.pos[2])as usize][c.pos[1] as usize][(c.pos[0] + 1) as usize]};
-            // c.faces[ZMinus.to_index()].on = if !in_field([c.pos[0], c.pos[1], c.pos[2] - 1]) {true} else {!self.occupancy_grid[(c.pos[2] - 1)as usize][c.pos[1] as usize][c.pos[0] as usize]};
-            // c.faces[ZPlus.to_index()].on = if !in_field([c.pos[0], c.pos[1], c.pos[2] + 1]) {true} else {!self.occupancy_grid[(c.pos[2] + 1)as usize][c.pos[1] as usize][c.pos[0] as usize]};
-            // c.faces[YMinus.to_index()].on = if !in_field([c.pos[0], c.pos[1] - 1, c.pos[2]]) {true} else {!self.occupancy_grid[(c.pos[2])as usize][(c.pos[1] - 1) as usize][c.pos[0] as usize]};
-            // c.faces[YPlus.to_index()].on = if !in_field([c.pos[0], c.pos[1] + 1, c.pos[2]]) {true} else {!self.occupancy_grid[(c.pos[2])as usize][(c.pos[1] + 1) as usize][c.pos[0] as usize]};
-            // c.faces[XMinus.to_index()].on = if !in_field([c.pos[0] - 1, c.pos[1], c.pos[2]]) {true} else {!self.occupancy_grid[(c.pos[2])as usize][c.pos[1] as usize][(c.pos[0] - 1) as usize]};
-            // c.faces[XPlus.to_index()].on = if !in_field([c.pos[0] + 1, c.pos[1], c.pos[2]]) {true} else {!self.occupancy_grid[(c.pos[2])as usize][c.pos[1] as usize][(c.pos[0] + 1) as usize]};
-
         }
     }
     

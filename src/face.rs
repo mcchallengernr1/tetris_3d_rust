@@ -1,4 +1,4 @@
-use macroquad::{color::Color, math::IVec3, prelude::{Vec2, Vec3}, shapes::{draw_line, draw_triangle}};
+use macroquad::{color::Color, math::IVec3, prelude::Vec3, shapes::{draw_line, draw_triangle}};
 
 
 use crate::{point::*, utils::Movable};
@@ -39,9 +39,12 @@ impl Face {
 impl Renderable for Face {
     fn draw(&self, cam: &Camera) {
         if self.on && cam.should_render_face(&self.normal, self.mid_pos) {
-            let proj_p: Vec<Vec2> = self.points.iter()
-                .map(|p| cam.project(p))
-                .collect();
+            let proj_p = [
+                cam.project(self.points[0].pos),
+                cam.project(self.points[1].pos),
+                cam.project(self.points[2].pos),
+                cam.project(self.points[3].pos)
+            ];
 
             draw_triangle(proj_p[0], proj_p[1], proj_p[2], self.color);
             draw_triangle(proj_p[0], proj_p[3], proj_p[2], self.color);

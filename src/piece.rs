@@ -71,7 +71,7 @@ const PIECE_COLOR: [Color; 29] = [
 
 pub struct Piece {
     pub n: usize,
-    pub cubes: [Cube; 5],
+    pub cubes: [Cube; PIECE_CONFIG[0].len()],
     pos: IVec3,
     pub axies: [Line; 3],
 }
@@ -97,7 +97,7 @@ impl Piece {
     }
 
     pub fn new_random() -> Piece {
-        Piece::new(gen_range(0, 29))
+        Piece::new(gen_range(0, PIECE_CONFIG.len()))
     }
 
     pub fn try_move(&mut self, field: &Field, mov: IVec3) -> bool {
@@ -180,7 +180,7 @@ impl Piece {
     }
 
     fn move_(&mut self, mov: IVec3) {
-        self.pos = self.pos + mov;
+        self.pos += mov;
         self.cubes.iter_mut().for_each(|c| c.move_(mov));
         self.axies.iter_mut().for_each(|l| l.move_(mov.as_vec3()));
     }
