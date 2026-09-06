@@ -80,7 +80,7 @@ impl Piece {
     pub fn new(n: usize) -> Piece {
         let pos = IVec3::new((CELLS_IN_X / 2) as i32, (CELLS_IN_Y / 2) as i32, (CELLS_IN_Z - 2) as i32);
 
-        let cubes = PIECE_CONFIG[n].map(|cpos| Cube::new(IVec3::from_array(cpos) + pos, PIECE_COLOR[n]));
+        let cubes = PIECE_CONFIG[n].map(|cpos| Cube::new(IVec3::from_array(cpos) + pos, PIECE_COLOR[n].with_alpha(1.0)));
 
         let axies = [
             Line::new(pos.as_vec3() + Vec3::new(-4.0, 0.5, 0.5), AXIS_LENGTH, X, Color::from_rgba(255, 0, 0, 255), false),

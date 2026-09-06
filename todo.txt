@@ -1,5 +1,4 @@
 - change render pipeline for cubes + implement drawn axies
-- line clear
 - game over detection
 - add menus
 - add next piece showcase

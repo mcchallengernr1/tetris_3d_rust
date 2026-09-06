@@ -1,5 +1,7 @@
+use macroquad::color::Color;
 use macroquad::math::IVec3;
 use macroquad::prelude::{Vec3, Conf, miniquad::conf::Platform};
+use macroquad::rand::gen_range;
 
 use crate::camera::Camera;
 use crate::{CELLS_IN_X, CELLS_IN_Y, CELLS_IN_Z};
@@ -37,10 +39,10 @@ pub enum Axis {
 pub fn window_conf() -> Conf {
     Conf {
         window_title: "Tetris 3D".to_owned(),
-        window_width: 1900,
-        window_height: 1000,
+        window_width: crate::INITIAL_WINDOW_WIDTH,
+        window_height: crate::INITIAL_WINDOW_HEIGHT,
         platform: Platform {
-          swap_interval: Some(0),
+          swap_interval: if crate::UNLOCKED_FPS {Some(0)} else {None},
           ..Default::default()
         },
         ..Default::default()
@@ -53,6 +55,10 @@ pub fn in_field(pos: IVec3) -> bool {
 
 pub fn is_x_looking(quadrant: i32) -> bool {
     quadrant == 7 || quadrant == 0 || quadrant == 3 || quadrant == 4
+}
+
+pub fn _random_color() -> Color {
+    Color::from_rgba(gen_range(0, 255), gen_range(0, 255), gen_range(0, 255), 255)
 }
 
 pub trait Renderable {

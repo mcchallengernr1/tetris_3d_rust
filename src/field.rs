@@ -1,10 +1,10 @@
-use macroquad::color::{Color, GRAY};
+use macroquad::color::Color;
 use macroquad::math::{Vec3, IVec3};
 use macroquad::rand::gen_range;
 
 use crate::C_S;
 use crate::piece::Piece;
-use crate::utils::{FaceNormal::*, in_field};
+use crate::utils::{FaceNormal::*, in_field, _random_color};
 use crate::{cube::Cube};
 use crate::line::{Line};
 use crate::utils::Axis;
@@ -14,7 +14,7 @@ pub struct Field {
     pub cubes: Vec<Cube>,
     pub outline: Outline,
     pub grid: Vec<Line>,
-    occupancy_grid: [[[bool; CELLS_IN_X]; CELLS_IN_Y]; CELLS_IN_Z],
+    pub occupancy_grid: [[[bool; CELLS_IN_X]; CELLS_IN_Y]; CELLS_IN_Z],
     _line_color: Color,
 }
 
@@ -85,18 +85,61 @@ impl Field {
     }
     
 
-    pub fn _fill_field_to_percent(&mut self, percent: u8) {
+    pub fn _fill_field_to_percent(&mut self, percent: u8, up_to_line: u8) {
         let mut cubes: Vec<Cube> = Vec::new();
-        for k in 0..CELLS_IN_Z as i32 {
+        for k in 0..up_to_line as i32 {
             for j in 0..CELLS_IN_Y as i32 {
                 for i in 0..CELLS_IN_X as i32 {
                     if gen_range(1, 100) <= percent {
-                        cubes.push(Cube::new(IVec3::new(i, j, k), GRAY));
+                        // if !(i == 0 && j == 0) && !(i == CELLS_IN_X as i32 - 1 && k == 2) && !(i == CELLS_IN_X as i32 - 1 && k == 0) && !(i == CELLS_IN_X as i32 - 2 && k == 2){
+                            cubes.push(Cube::new(IVec3::new(i, j, k), _random_color()));
+                        // }
                     }
                 }
             }
         }
 
         self.add_cubes(cubes);
+    }
+
+    pub fn try_line_clear(&mut self) -> usize {
+        let mut lines_to_clear = Vec::new();
+        for (i, line) in self.occupancy_grid.iter_mut().enumerate() {
+            if line == &[[true; CELLS_IN_X]; CELLS_IN_Y] {
+                lines_to_clear.push(i as i32);
+            }
+        }
+
+        let n = lines_to_clear.len();
+
+        if !lines_to_clear.is_empty() {
+            let l = self.cubes.len() - 1;
+            let min = lines_to_clear[0];
+            let max = lines_to_clear[lines_to_clear.len() - 1];
+
+            for i in 0..self.cubes.len() {
+                let c = &mut self.cubes[l - i];
+                if lines_to_clear.contains(&c.pos[2]) {
+                    self.cubes.remove(l - i);
+                } else if c.pos[2] > max {
+                    c.move_(IVec3::new(0, 0, - (n as i32)))
+                } else if c.pos[2] > min {
+                    let mut i = 0;
+                    while lines_to_clear[i] < c.pos[2] {i += 1}
+                    c.move_(IVec3::new(0, 0, - (i as i32)))
+                }
+            }
+            
+            for line in lines_to_clear.iter().rev() {
+                for i in *line as usize..(self.occupancy_grid.len() - 1) {
+                    self.occupancy_grid[i] = self.occupancy_grid[i + 1]
+                }
+                self.occupancy_grid[self.occupancy_grid.len() - 1] = [[false; CELLS_IN_X]; CELLS_IN_Y];
+            }
+            
+            self.disable_hidden_faces();
+        }
+        
+        n
     }
 }

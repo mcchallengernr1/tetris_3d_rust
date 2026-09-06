@@ -70,7 +70,8 @@ impl GameHandler {
         self.last_mouse_pos = self.mouse_pos;
 
         if is_key_pressed(KeyCode::Tab) || is_key_pressed(KeyCode::Escape) {self.running = false};
-        if is_key_pressed(KeyCode::Space) {self.paused = !self.paused};
+        // if is_key_pressed(KeyCode::Space) {self.paused = !self.paused};
+        if is_key_down(KeyCode::LeftControl) {self.time_until_next_sink = 0.1};
         if is_mouse_button_down(MouseButton::Left) {cam.spherical_movement(self.mouse_displacement)};
 
         self.scroll = match mouse_wheel().1 {
@@ -155,7 +156,7 @@ impl GameHandler {
         // Defines sinks
         self.sinks = false;
 
-        if self.last_sink_time + self.time_until_next_sink < now {
+        if !self.paused && self.last_sink_time + self.time_until_next_sink < now {
             self.last_sink_time = now;
             self.sinks = true;
             self.time_until_next_sink = self.get_time_until_next_sink();
@@ -166,6 +167,6 @@ impl GameHandler {
 
     pub fn get_time_until_next_sink(&self) -> f64 {
         // Placeholder value since the game is too incomplete to balance it now
-        1.0
+        2.0
     }
 }
