@@ -189,7 +189,11 @@ impl Camera {
 
     }
 
-    pub fn display_text (&mut self, piece: &Piece, fps: u32) {
+    pub fn display_text (&self, piece: &Piece, fps: u32) {
         draw_text(format!("FPS: {0}  quadrant: {1}  Piece: {2}", fps, self.quadrant, piece.n), 10.0, 30.0, 40.0, WHITE);
+    }
+
+    pub fn display_game_over (&self) {
+        draw_text("Game Over!", self.width / 2.0 - 300.0, self.height / 2.0, 150.0, WHITE);
     }
 }

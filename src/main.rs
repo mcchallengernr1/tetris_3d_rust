@@ -42,7 +42,7 @@ async fn main() {
     let mut piece = Piece::new(0);
 
     let mut field = Field::new(WHITE);
-    // field._fill_field_to_percent(100, 10);
+    // field._fill_field_to_percent(90, 20);
 
     // Pre smart sort in render pipeline
     // Performance: 100% fill: 400      50% fill: 230
@@ -65,9 +65,10 @@ async fn main() {
             field.add_piece(piece);
             let _number_of_cleared_lines = field.try_line_clear();
             piece = Piece::new_random();
-
+            piece.cubes.iter().for_each(|c| if field.taken_cube(c.pos) {game_handler.game_over = true; game_handler.game_over_time = now()});
         }
 
+        game_handler.game_over_event();
 
         // Display
         cam.update_internal_vars();
@@ -77,6 +78,10 @@ async fn main() {
         cam.draw(&piece, &mut field);
 
         cam.display_text(&piece, game_handler.get_fps());
+
+        if game_handler.game_over {
+            cam.display_game_over();
+        }
         
         next_frame().await
     }

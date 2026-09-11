@@ -1,5 +1,6 @@
 use macroquad::color::{GREEN, RED};
 use macroquad::math::{IVec3, Vec2};
+use macroquad::miniquad::date::now;
 use macroquad::time::get_time;
 
 use macroquad::{input::{MouseButton, is_mouse_button_down, mouse_position_local, mouse_wheel}, prelude::{KeyCode, is_key_pressed, is_key_down}};
@@ -35,6 +36,9 @@ pub struct GameHandler {
     scroll: Scroll,
     action: Action,
     pub paused: bool,
+    pub game_over: bool,
+    pub game_over_timer: f64,
+    pub game_over_time: f64,
     last_frame_time: f64,
     counted_frames: u32,
     fps: u32,
@@ -46,7 +50,7 @@ pub struct GameHandler {
 impl GameHandler {
     pub fn new(paused: bool) -> GameHandler {
         let now = get_time();
-        GameHandler {
+        let mut game_handler = GameHandler {
             running: true,
             mouse_pos: Vec2::ZERO,
             last_mouse_pos: Vec2::ZERO,
@@ -54,13 +58,18 @@ impl GameHandler {
             scroll: Scroll::Not,
             action: Action::None,
             paused,
+            game_over: false,
+            game_over_timer: 10.0,
+            game_over_time: 0.0,
             last_frame_time: now,
             counted_frames: 0,
             fps: 0,
             sinks: false,
             last_sink_time: now,
-            time_until_next_sink: 1.0,
-        }
+            time_until_next_sink: 0.0,
+        };
+        game_handler.get_time_until_next_sink();
+        game_handler
     }
 
     pub fn events(&mut self, cam: &mut Camera) {
@@ -159,14 +168,23 @@ impl GameHandler {
         if !self.paused && self.last_sink_time + self.time_until_next_sink < now {
             self.last_sink_time = now;
             self.sinks = true;
-            self.time_until_next_sink = self.get_time_until_next_sink();
+            self.get_time_until_next_sink();
         }   
     }
 
     pub fn get_fps(&self) -> u32 {self.fps}
 
-    pub fn get_time_until_next_sink(&self) -> f64 {
+    pub fn get_time_until_next_sink(&mut self) {
         // Placeholder value since the game is too incomplete to balance it now
-        2.0
+        self.time_until_next_sink = 2.0
+    }
+
+    pub fn game_over_event(&mut self) {
+        if self.game_over {
+            self.paused = true;
+            if self.game_over_time + self.game_over_timer < now() {
+                self.running = false;
+            }
+        }
     }
 }
