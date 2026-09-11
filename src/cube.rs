@@ -6,6 +6,7 @@ use macroquad::color::Color;
 use macroquad::math::{IVec3, Vec3};
 
 
+#[derive(Copy, Clone)]
 pub struct Cube {
     pub faces: [Face; 6],
     pub pos: IVec3,
@@ -30,11 +31,7 @@ impl Cube {
         self.move_(IVec3::new(pos[0] - self.pos[0], pos[1] - self.pos[1], pos[2] - self.pos[2]))
     }
 
-    pub fn move_(&mut self, mov: IVec3) {
-        self.mid_pos += mov.as_vec3();
-        self.faces.iter_mut().for_each(|f| f.move_(mov.as_vec3()));
-        self.pos += mov;
-    }
+
 }
 
 impl Renderable for Cube {
@@ -42,7 +39,15 @@ impl Renderable for Cube {
         self.faces.iter().for_each(|f| f.draw(cam));
     }
 
-    fn dist_to_pos(&self, pos: Vec3) -> f32 {
-        (self.mid_pos - pos).length()
+    // fn dist_to_pos(&self, pos: Vec3) -> f32 {
+    //     (self.mid_pos - pos).length()
+    // }
+}
+
+impl Movable for Cube {
+    fn move_(&mut self, mov: IVec3) {
+        self.mid_pos += mov.as_vec3();
+        self.faces.iter_mut().for_each(|f| f.move_(mov));
+        self.pos += mov;
     }
 }

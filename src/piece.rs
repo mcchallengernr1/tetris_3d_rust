@@ -2,7 +2,7 @@ use std::array;
 use crate::line::Line;
 use crate::utils::{Axis::*, Movable};
 use crate::{cube::Cube, field::Field};
-use macroquad::{color::Color, math::{Vec3, IVec3}, rand::gen_range};
+use macroquad::{color::Color, math::IVec3, rand::gen_range};
 use crate::{AXIS_LENGTH, CELLS_IN_X, CELLS_IN_Y, CELLS_IN_Z};
 use crate::utils::{Axis, in_field};
 
@@ -37,7 +37,7 @@ const PIECE_CONFIG: [[[i32; 3]; 5]; 29]= [
     [[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1], [-1, 1, 0]],
     [[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1], [-1, 0, 1]]];
 
-const PIECE_COLOR: [Color; 29] = [
+pub const PIECE_COLOR: [Color; 29] = [
     Color::from_rgba(255, 0, 0, 255), 
     Color::from_rgba(255, 51, 0, 255), 
     Color::from_rgba(255, 106, 0, 255), 
@@ -68,7 +68,6 @@ const PIECE_COLOR: [Color; 29] = [
     Color::from_rgba(255, 0, 106, 255), 
     Color::from_rgba(255, 0, 51, 255)];
 
-
 pub struct Piece {
     pub n: usize,
     pub cubes: [Cube; PIECE_CONFIG[0].len()],
@@ -83,9 +82,9 @@ impl Piece {
         let cubes = PIECE_CONFIG[n].map(|cpos| Cube::new(IVec3::from_array(cpos) + pos, PIECE_COLOR[n].with_alpha(1.0)));
 
         let axies = [
-            Line::new(pos.as_vec3() + Vec3::new(-4.0, 0.5, 0.5), AXIS_LENGTH, X, Color::from_rgba(255, 0, 0, 255), false),
-            Line::new(pos.as_vec3() + Vec3::new(0.5, -4.0, 0.5), AXIS_LENGTH, Y, Color::from_rgba(0, 255, 0, 255), false),
-            Line::new(pos.as_vec3() + Vec3::new(0.5, 0.5, -4.0), AXIS_LENGTH, Z, Color::from_rgba(0, 0, 255, 255), false),
+            Line::new(pos.with_x(pos.x - AXIS_LENGTH as i32 / 2), true, AXIS_LENGTH, X, Color::from_rgba(255, 0, 0, 255), false),
+            Line::new(pos.with_y(pos.y - AXIS_LENGTH as i32 / 2), true, AXIS_LENGTH, Y, Color::from_rgba(0, 255, 0, 255), false),
+            Line::new(pos.with_z(pos.z - AXIS_LENGTH as i32 / 2), true, AXIS_LENGTH, Z, Color::from_rgba(0, 0, 255, 255), false),
         ];
         
         Piece {
@@ -179,9 +178,18 @@ impl Piece {
             }
     }
 
+    pub fn get_active_axis_index(&self) -> Option<usize> {
+        for (i, axis) in self.axies.iter().enumerate() {
+            if axis.on {return Some(i);}
+        };
+        None
+    }    
+}
+
+impl Movable for Piece {
     fn move_(&mut self, mov: IVec3) {
         self.pos += mov;
         self.cubes.iter_mut().for_each(|c| c.move_(mov));
-        self.axies.iter_mut().for_each(|l| l.move_(mov.as_vec3()));
+        self.axies.iter_mut().for_each(|l| l.move_(mov));
     }
 }

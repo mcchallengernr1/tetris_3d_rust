@@ -11,8 +11,12 @@ const X_DARKEN_FACTOR: f32 = 1.3;
 const Y_DARKEN_FACTOR: f32 = 1.6;
 const ZP_DARKEN_FACTOR: f32 = 1.1;
 const ZM_DARKEN_FACTOR: f32 = 2.5;
-const SEGMENT_LIGHTEN_ADD: f32 = 0.5;
 
+fn lighten_color_component(c: f32) -> f32 {
+    ((1.0 - c) / 2.0 + c).clamp(0.0, 1.0)
+}
+
+#[derive(Copy, Clone)]
 pub struct Face {
     points: [Point; 4],
     mid_pos: Vec3,
@@ -36,9 +40,7 @@ impl Face {
             ZPlus => {mid_pos[0] += C_H_S; mid_pos[1] += C_H_S; mid_pos[2] += C_S; [IVec3::new(pos[0], pos[1], pos[2] + 1), IVec3::new(pos[0] + 1, pos[1], pos[2] + 1), IVec3::new(pos[0] + 1, pos[1] + 1, pos[2] + 1), IVec3::new(pos[0], pos[1] + 1, pos[2] + 1)]}
         };
 
-
-
-        let segment_color = Color { r: (color.r + SEGMENT_LIGHTEN_ADD).clamp(0.0, 1.0), g: (color.g + SEGMENT_LIGHTEN_ADD).clamp(0.0, 1.0), b: (color.b + SEGMENT_LIGHTEN_ADD).clamp(0.0, 1.0), a: 1.0 };
+        let segment_color = Color::new(lighten_color_component(color.r), lighten_color_component(color.g), lighten_color_component(color.b), 1.0);
         // let segment_color = Color::new(1.0, 1.0, 1.0, 1.0);
 
         let face_color = if normal == XMinus || normal == XPlus {
@@ -80,16 +82,16 @@ impl Renderable for Face {
         }
     }
     
-    fn dist_to_pos(&self, pos: Vec3) -> f32 {
-        (self.mid_pos - pos).length()
-    }
+    // fn dist_to_pos(&self, pos: Vec3) -> f32 {
+    //     (self.mid_pos - pos).length()
+    // }
 }
 
 impl Movable for Face {
-    fn move_(&mut self, movement: Vec3) {
+    fn move_(&mut self, mov: IVec3) {
         for p in &mut self.points {
-            p.move_(movement)
+            p.move_(mov)
         }
-        self.mid_pos += movement;
+        self.mid_pos += mov.as_vec3();
     }
 }

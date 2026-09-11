@@ -4,8 +4,8 @@ use macroquad::math::Vec3;
 use macroquad::window::{clear_background, screen_height, screen_width};
 use macroquad::prelude::draw_text;
 
-use crate::cube::Cube;
-use crate::utils::{Renderable, FaceNormal, FaceNormal::*};
+use crate::utils::in_field;
+use crate::utils::{FaceNormal::{self, *}, Renderable};
 use crate::field::Field;
 use crate::piece::Piece;
 use crate::{CELLS_IN_X, CELLS_IN_Y, CELLS_IN_Z, CAMERA_RADIUS};
@@ -94,15 +94,29 @@ impl Camera {
         clear_background(BLACK);
     }
 
-    pub fn draw(&self, piece: &Piece, field: &Field) {
+    pub fn draw(&self, piece: &Piece, field: &mut Field) {
+        let axis_i = piece.get_active_axis_index();
+
         let top_predraw = self.pos[2] < field.outline.t_xm.mid_pos[2];
         let grid_predraw = self.pos[2] > field.grid[0].mid_pos[2];
         let xm_ym_predraw = !(self.pos[0] < 0.0 || self.pos[1] < 0.0);
         let xp_ym_predraw = !(self.pos[0] > field.outline.xp_ym.mid_pos[0] || self.pos[1] < 0.0);
         let xm_yp_predraw = !(self.pos[0] < 0.0 || self.pos[1] > field.outline.xm_yp.mid_pos[1]);
-        let xp_yp_predraw = !(self.pos[0] > field.outline.xp_yp.mid_pos[0] || self.pos[1] > field.outline.xp_yp.mid_pos[1]);
+        let xp_yp_predraw = !(self.pos[0] > field.outline.xp_yp.mid_pos[0] || self.pos[1] > field.outline.xp_yp.mid_pos[1]);        
 
         // Predraw
+        
+        if let Some(i) = axis_i {
+            piece.axies[i].segments.iter().for_each(|s| if !in_field(s.pos) {
+                if s.pos[0] >= CELLS_IN_X as i32 && self.pos[0] <= CELLS_IN_X as f32 {s.draw(self);}
+                if s.pos[0] <= 0 && self.pos[0] >= 0.0 {s.draw(self);}
+                if s.pos[1] >= CELLS_IN_Y as i32 && self.pos[1] <= CELLS_IN_Y as f32 {s.draw(self);}
+                if s.pos[1] <= 0 && self.pos[1] >= 0.0 {s.draw(self);}
+                if s.pos[2] >= CELLS_IN_Z as i32 && top_predraw {s.draw(self);}
+                if s.pos[2] <= 0 && grid_predraw {s.draw(self);}
+            })
+        };
+
         if top_predraw {
             field.outline.t_xm.draw(self);
             field.outline.t_xp.draw(self);
@@ -118,20 +132,34 @@ impl Camera {
         if xp_yp_predraw {field.outline.xp_yp.draw(self);}
 
         // Draw Cubes
-        let mut cubes: Vec<&Cube> = Vec::new();
-        for cube in &field.cubes {
-            cubes.push(cube);
+        piece.cubes.iter().for_each(|c| field.cubes[c.pos[2] as usize][c.pos[1] as usize][c.pos[0] as usize] = Some(*c));
+
+        let k_switch =  if self.pos[2] < 0.5 {0} else if self.pos[2] > CELLS_IN_Z as f32 - 0.5 { CELLS_IN_Z } else {(self.pos[2] - 0.5).floor() as usize};
+        let j_switch = if self.pos[1] < 0.0 {0} else if self.pos[1] > CELLS_IN_Y as f32 { CELLS_IN_Y } else {(self.pos[1]).floor() as usize};
+        let i_switch = if self.pos[0] < 0.0 {0} else if self.pos[0] > CELLS_IN_X as f32 { CELLS_IN_X } else {(self.pos[0]).floor() as usize};
+
+        for k_ in 0..CELLS_IN_Z {
+            let k = if k_ < k_switch { k_ } else { CELLS_IN_Z - 1 - k_ + k_switch };
+            for j_ in 0..CELLS_IN_Y {
+                let j = if j_ < j_switch { j_ } else { CELLS_IN_Y - 1 - j_ + j_switch };
+                for i_ in 0..CELLS_IN_X {
+                    let i = if i_ < i_switch { i_ } else { CELLS_IN_X - 1 - i_ + i_switch };
+                    match &field.cubes[k][j][i] {
+                        None => if let Some(i_) = axis_i {
+                            piece.axies[i_].segments.iter().for_each(|s| 
+                                if s.pos.x == i as i32 && s.pos.y == j as i32 && s.pos.z == k as i32 {s.draw(self);});
+                        },
+                        Some(c) => {
+                            c.draw(self);
+                        } 
+                    }
+                }
+            }
         }
-
-        for cube in &piece.cubes {
-            cubes.push(cube);
-        }
-
-        cubes.sort_by(|c1, c2| c2.dist_to_pos(self.pos).total_cmp(&c1.dist_to_pos(self.pos)));
-
-        cubes.iter().for_each(|c| c.draw(self));
-
-        piece.axies.iter().for_each(|l| if l.on {l.draw(self);});
+        
+        piece.cubes.iter().for_each(|c| field.cubes[c.pos[2] as usize][c.pos[1] as usize][c.pos[0] as usize] = None);
+        // piece.cubes.iter().for_each(|c| c.draw(self));
+        // piece.axies.iter().for_each(|l| if l.on {l.draw(self);});
 
         // Postdraw
         if !top_predraw {
@@ -147,6 +175,18 @@ impl Camera {
         if !xm_yp_predraw {field.outline.xm_yp.draw(self);}
         if !xp_ym_predraw {field.outline.xp_ym.draw(self);}
         if !xp_yp_predraw {field.outline.xp_yp.draw(self);}
+
+        if let Some(i) = axis_i {
+            piece.axies[i].segments.iter().for_each(|s| if !in_field(s.pos) {
+                if s.pos[0] >= CELLS_IN_X as i32 && self.pos[0] >= CELLS_IN_X as f32 {s.draw(self);}
+                if s.pos[0] <= 0 && self.pos[0] <= 0.0 {s.draw(self);}
+                if s.pos[1] >= CELLS_IN_Y as i32 && self.pos[1] >= CELLS_IN_Y as f32 {s.draw(self);}
+                if s.pos[1] < 0 && self.pos[1] <= 0.0 {s.draw(self);}
+                if s.pos[2] >= CELLS_IN_Z as i32 && !top_predraw {s.draw(self);}
+                if s.pos[2] <= 0 && !grid_predraw {s.draw(self);}
+            })
+        };
+
     }
 
     pub fn display_text (&mut self, piece: &Piece, fps: u32) {

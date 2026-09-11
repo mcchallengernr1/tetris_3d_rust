@@ -1,6 +1,6 @@
 use macroquad::color::Color;
 use macroquad::math::IVec3;
-use macroquad::prelude::{Vec3, Conf, miniquad::conf::Platform};
+use macroquad::prelude::{Conf, miniquad::conf::Platform};
 use macroquad::rand::gen_range;
 
 use crate::camera::Camera;
@@ -8,6 +8,7 @@ use crate::{CELLS_IN_X, CELLS_IN_Y, CELLS_IN_Z};
 use FaceNormal::*;
 
 #[derive(PartialEq)]
+#[derive(Copy, Clone)]
 pub enum FaceNormal {
     XPlus,
     XMinus,
@@ -18,7 +19,7 @@ pub enum FaceNormal {
 }
 
 impl FaceNormal {
-    pub fn to_index(&self) -> usize {
+    pub fn to_index(self) -> usize {
         match self {
             XMinus => 0,
             XPlus => 1,
@@ -58,14 +59,15 @@ pub fn is_x_looking(quadrant: i32) -> bool {
 }
 
 pub fn _random_color() -> Color {
-    Color::from_rgba(gen_range(0, 255), gen_range(0, 255), gen_range(0, 255), 255)
+    // Color::from_rgba(gen_range(0, 255), gen_range(0, 255), gen_range(0, 255), 255)
+    crate::piece::PIECE_COLOR[gen_range(0, crate::piece::PIECE_COLOR.len() - 1)]
 }
 
 pub trait Renderable {
     fn draw(&self, cam: &Camera);
-    fn dist_to_pos(&self, pos: Vec3) -> f32;
+    // fn dist_to_pos(&self, pos: Vec3) -> f32;
 }
 
 pub trait Movable {
-    fn move_(&mut self, movement: Vec3);
+    fn move_(&mut self, mov: IVec3);
 }

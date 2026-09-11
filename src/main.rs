@@ -15,7 +15,7 @@ use crate::game_handler::GameHandler;
 use crate::utils::window_conf;
 use crate::piece::Piece;
 
-use macroquad::{color::PURPLE, math::IVec3, miniquad::date::now, prelude::next_frame, rand};
+use macroquad::{color::WHITE, math::IVec3, miniquad::date::now, prelude::next_frame, rand};
 
 const C_S: f32 = 1.0;
 const C_H_S: f32 = C_S / 2.0;
@@ -27,7 +27,7 @@ const CELLS_IN_Z: usize = 20;
 const CAMERA_RADIUS: f32 = 50.0;
 const AXIS_LENGTH: usize = 9;
 
-const UNLOCKED_FPS: bool = false;
+const UNLOCKED_FPS: bool = true;
 const INITIAL_WINDOW_WIDTH: i32 = 2100;
 const INITIAL_WINDOW_HEIGHT: i32 = 1470;
 
@@ -41,8 +41,16 @@ async fn main() {
 
     let mut piece = Piece::new(0);
 
-    let mut field = Field::new(PURPLE);
-    // field._fill_field_to_percent(50, 8);
+    let mut field = Field::new(WHITE);
+    // field._fill_field_to_percent(100, 10);
+
+    // Pre smart sort in render pipeline
+    // Performance: 100% fill: 400      50% fill: 230
+    // Eco:         100% fill: 130      50% fill: 90
+
+    // Performance: 100% fill: 650      50% fill: 250
+    // Eco:         100% fill: 240      50% fill: 100
+    // en_US.UTF-8
 
     while game_handler.running {
         // Events
@@ -66,7 +74,7 @@ async fn main() {
 
         cam.clear_screen();
 
-        cam.draw(&piece, &field);
+        cam.draw(&piece, &mut field);
 
         cam.display_text(&piece, game_handler.get_fps());
         
