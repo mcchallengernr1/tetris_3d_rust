@@ -31,6 +31,9 @@ impl Cube {
         self.move_(IVec3::new(pos[0] - self.pos[0], pos[1] - self.pos[1], pos[2] - self.pos[2]))
     }
 
+    pub fn _dist_to_pos(&self, pos: Vec3) -> f32 {
+        (self.mid_pos - pos).length()
+    }
 
 }
 
@@ -39,9 +42,6 @@ impl Renderable for Cube {
         self.faces.iter().for_each(|f| f.draw(cam));
     }
 
-    // fn dist_to_pos(&self, pos: Vec3) -> f32 {
-    //     (self.mid_pos - pos).length()
-    // }
 }
 
 impl Movable for Cube {

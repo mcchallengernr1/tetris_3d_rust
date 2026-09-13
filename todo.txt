@@ -1,5 +1,5 @@
-- game over detection
 - add menus
-- add next piece showcase
+- add next piece showcase (WIP)
+- add piece field guide
 - points system
 - streamline game design

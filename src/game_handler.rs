@@ -45,6 +45,7 @@ pub struct GameHandler {
     pub sinks: bool,
     last_sink_time: f64,
     time_until_next_sink: f64,
+    pub _n: usize,
 }
 
 impl GameHandler {
@@ -67,6 +68,7 @@ impl GameHandler {
             sinks: false,
             last_sink_time: now,
             time_until_next_sink: 0.0,
+            _n: 0
         };
         game_handler.get_time_until_next_sink();
         game_handler
@@ -80,6 +82,7 @@ impl GameHandler {
 
         if is_key_pressed(KeyCode::Tab) || is_key_pressed(KeyCode::Escape) {self.running = false};
         // if is_key_pressed(KeyCode::Space) {self.paused = !self.paused};
+        if is_key_pressed(KeyCode::Q) {self._n += 1; if self._n >= 29 {self._n = 0}};
         if is_key_down(KeyCode::LeftControl) {self.time_until_next_sink = 0.1};
         if is_mouse_button_down(MouseButton::Left) {cam.spherical_movement(self.mouse_displacement)};
 

@@ -8,7 +8,8 @@ use crate::utils::in_field;
 use crate::utils::{FaceNormal::{self, *}, Renderable};
 use crate::field::Field;
 use crate::piece::Piece;
-use crate::{CELLS_IN_X, CELLS_IN_Y, CELLS_IN_Z, CAMERA_RADIUS};
+use crate::{CAMERA_RADIUS, CELLS_IN_X, CELLS_IN_Y, CELLS_IN_Z};
+use crate::showcase::Showcase;
 
 pub struct Camera {
     pos: Vec3,
@@ -23,6 +24,7 @@ pub struct Camera {
     azimuth_uv: Vec3,
     spherical_mov_multiplier: f32,
     pub quadrant: i32,
+    showcases: [Showcase; 29],
 }
 
 impl Camera {
@@ -39,8 +41,9 @@ impl Camera {
         let azimuth_uv = Vec3::ZERO;
         let spherical_mov_multiplier = width / 300.0;
         let quadrant = 0;
+        let showcases = std::array::from_fn(|n| Showcase::new(n));
 
-        Camera {pos, orbit_center_pos, radius, focal_length, width, height, inclination, azimuth, polar_uv, azimuth_uv, spherical_mov_multiplier, quadrant }
+        Camera {pos, orbit_center_pos, radius, focal_length, width, height, inclination, azimuth, polar_uv, azimuth_uv, spherical_mov_multiplier, quadrant, showcases }
     }
     
     pub fn project(&self, pos: Vec3) -> Vec2 {
@@ -195,5 +198,9 @@ impl Camera {
 
     pub fn display_game_over (&self) {
         draw_text("Game Over!", self.width / 2.0 - 300.0, self.height / 2.0, 150.0, WHITE);
+    }
+
+    pub fn dispay_showcase(&mut self) {
+        self.showcases[0].draw(100, 100);
     }
 }

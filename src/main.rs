@@ -8,6 +8,7 @@ mod field;
 mod line;
 mod piece;
 mod game_handler;
+mod showcase;
 
 use crate::field::Field;
 use crate::camera::Camera;
@@ -65,7 +66,12 @@ async fn main() {
             field.add_piece(piece);
             let _number_of_cleared_lines = field.try_line_clear();
             piece = Piece::new_random();
+            game_handler._n = piece.n;
             piece.cubes.iter().for_each(|c| if field.taken_cube(c.pos) {game_handler.game_over = true; game_handler.game_over_time = now()});
+        }
+
+        if game_handler._n != piece.n {
+            piece = Piece::new(game_handler._n)
         }
 
         game_handler.game_over_event();
@@ -76,6 +82,8 @@ async fn main() {
         cam.clear_screen();
 
         cam.draw(&piece, &mut field);
+
+        cam.dispay_showcase();
 
         cam.display_text(&piece, game_handler.get_fps());
 

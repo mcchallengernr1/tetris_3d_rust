@@ -6,7 +6,7 @@ use macroquad::{color::Color, math::IVec3, rand::gen_range};
 use crate::{AXIS_LENGTH, CELLS_IN_X, CELLS_IN_Y, CELLS_IN_Z};
 use crate::utils::{Axis, in_field};
 
-const PIECE_CONFIG: [[[i32; 3]; 5]; 29]= [
+pub const PIECE_CONFIG: [[[i32; 3]; 5]; 29]= [
     [[-2, 0, 0], [-1, 0, 0], [0, 0, 0], [1, 0, 0], [2, 0, 0]],
     [[-2, 0, 0], [-1, 0, 0], [0, 0, 0], [1, 0, 0], [1, 1, 0]],
     [[-2, 0, 0], [-1, 0, 0], [0, 0, 0], [0, 1, 0], [1, 1, 0]],
@@ -77,7 +77,7 @@ pub struct Piece {
 
 impl Piece {
     pub fn new(n: usize) -> Piece {
-        let pos = IVec3::new((CELLS_IN_X / 2) as i32, (CELLS_IN_Y / 2) as i32, (CELLS_IN_Z - 2) as i32);
+        let pos = IVec3::new((CELLS_IN_X / 2) as i32, (CELLS_IN_Y / 2) as i32, (CELLS_IN_Z - if n <= 11 {1} else {2}) as i32);
 
         let cubes = PIECE_CONFIG[n].map(|cpos| Cube::new(IVec3::from_array(cpos) + pos, PIECE_COLOR[n].with_alpha(1.0)));
 
